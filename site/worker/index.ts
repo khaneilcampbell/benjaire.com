@@ -1,7 +1,7 @@
 // benjaire.com Worker. Static pages are served from ./dist by the assets
 // layer; only /api/* reaches this script (see wrangler.jsonc).
 import { EmailMessage } from 'cloudflare:email';
-import { buildMime, checkoutParams, composeEmail, flowPayload, hostAllowed, originAllowed, paymentLinkFor, postWithRetry, recipientFor, validate, type CheckoutTier, type Inquiry } from './lib';
+import { buildMime, checkoutParams, composeEmail, flowPayload, hostAllowed, originAllowed, paymentLinkFor, postWithRetry, recipientFor, SITE_CAP_KEYS, underSiteCap, validate, type CheckoutTier, type Inquiry } from './lib';
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -71,6 +71,10 @@ async function handleContact(req: Request, env: Env, ctx: ExecutionContext): Pro
   if (!underLimit) {
     return respond(req, 429, { ok: false, error: 'Too many messages in a short time. Please wait a minute and try again.' });
   }
+  if (!(await underSiteCap(env.SITE_LIMITER, SITE_CAP_KEYS.contact))) {
+    console.warn('Contact form site-wide cap reached');
+    return respond(req, 429, { ok: false, error: 'The form is busy right now. Please try again in a minute.' });
+  }
 
   let form: FormData;
   try {
@@ -137,6 +141,11 @@ async function handleCheckout(req: Request, env: Env): Promise<Response> {
   if (!env.STRIPE_SECRET_KEY || !cfg?.price) return Response.redirect(fallback, 303);
   const { success: underLimit } = await env.CONTACT_LIMITER.limit({ key: `checkout:${ip}` });
   if (!underLimit) return Response.redirect(fallback, 303);
+  // Past the site-wide cap, buyers still pay through the tier's Payment Link.
+  if (!(await underSiteCap(env.SITE_LIMITER, SITE_CAP_KEYS.checkout))) {
+    console.warn('Checkout site-wide cap reached');
+    return Response.redirect(fallback, 303);
+  }
 
   // Return buyers to the host they came from, but only one of ours.
   const origin = hostAllowed(url.hostname, env.ALLOWED_HOSTS) ? url.origin : 'https://benjaire.com';
