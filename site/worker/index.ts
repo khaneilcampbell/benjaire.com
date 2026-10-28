@@ -1,7 +1,7 @@
 // benjaire.com Worker. Static pages are served from ./dist by the assets
 // layer; only /api/* reaches this script (see wrangler.jsonc).
 import { EmailMessage } from 'cloudflare:email';
-import { buildMime, checkoutParams, composeEmail, flowPayload, hostAllowed, originAllowed, paymentLinkFor, postWithRetry, recipientFor, SITE_CAP_KEYS, underSiteCap, validate, type CheckoutTier, type Inquiry } from './lib';
+import { atlasRun, buildMime, checkoutParams, composeEmail, flowPayload, hostAllowed, originAllowed, paymentLinkFor, postWithRetry, recipientFor, reportToAtlas, SITE_CAP_KEYS, underSiteCap, validate, type CheckoutTier, type Inquiry } from './lib';
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -24,6 +24,10 @@ function respond(req: Request, status: number, body: Record<string, unknown>): R
   return new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
 }
 
+function report(env: Env, ctx: ExecutionContext, run: ReturnType<typeof atlasRun>): void {
+  ctx.waitUntil(reportToAtlas(env.ATLAS_FEED_URL, env.ATLAS_FEED_TOKEN, run));
+}
+
 async function verifyTurnstile(token: string, secret: string, ip: string | null): Promise<boolean> {
   if (!token || !secret) return false;
   const form = new FormData();
@@ -39,7 +43,7 @@ async function verifyTurnstile(token: string, secret: string, ip: string | null)
 // Forward a delivered inquiry to Benjaire Flow (n8n), which sorts it, alerts
 // the owner and acknowledges the sender. Runs after the response is sent and
 // never affects it: the email above stays the record if Flow is unreachable.
-async function forwardToFlow(inquiry: Inquiry, env: Env): Promise<void> {
+async function forwardToFlow(inquiry: Inquiry, env: Env, ctx: ExecutionContext): Promise<void> {
   if (!env.FLOW_INTAKE_URL || !env.FLOW_INTAKE_KEY) return;
   const result = await postWithRetry(env.FLOW_INTAKE_URL, {
     headers: {
@@ -51,8 +55,11 @@ async function forwardToFlow(inquiry: Inquiry, env: Env): Promise<void> {
   });
   if (!result.ok) {
     console.error('Flow intake failed', { attempts: result.attempts, status: result.status, error: result.error });
-  } else if (result.attempts > 1) {
-    console.log('Flow intake delivered after retry', { attempts: result.attempts });
+    report(env, ctx, atlasRun('benjaire-flow-intake', 'Flow intake', 'failed',
+      `${result.attempts} attempt(s), ${result.status ? `HTTP ${result.status}` : result.error ?? 'no response'}`));
+  } else {
+    if (result.attempts > 1) console.log('Flow intake delivered after retry', { attempts: result.attempts });
+    report(env, ctx, atlasRun('benjaire-flow-intake', 'Flow intake', 'ok', result.attempts > 1 ? `Delivered after ${result.attempts} attempts` : ''));
   }
 }
 
@@ -73,6 +80,7 @@ async function handleContact(req: Request, env: Env, ctx: ExecutionContext): Pro
   }
   if (!(await underSiteCap(env.SITE_LIMITER, SITE_CAP_KEYS.contact))) {
     console.warn('Contact form site-wide cap reached');
+    report(env, ctx, atlasRun('benjaire-contact-worker', 'Contact form', 'skipped', 'Site-wide cap reached (20 a minute)'));
     return respond(req, 429, { ok: false, error: 'The form is busy right now. Please try again in a minute.' });
   }
 
@@ -99,6 +107,7 @@ async function handleContact(req: Request, env: Env, ctx: ExecutionContext): Pro
 
   if (!env.CONTACT_TO) {
     console.error('CONTACT_TO is not configured');
+    report(env, ctx, atlasRun('benjaire-contact-worker', 'Contact form', 'failed', 'CONTACT_TO is not configured'));
     return respond(req, 503, { ok: false, error: 'The form is temporarily unavailable.' });
   }
 
@@ -119,9 +128,11 @@ async function handleContact(req: Request, env: Env, ctx: ExecutionContext): Pro
     await env.SEND_EMAIL.send(new EmailMessage(env.MAIL_FROM, to, raw));
   } catch (err) {
     console.error('send_email failed', err instanceof Error ? err.message : err);
+    report(env, ctx, atlasRun('benjaire-contact-worker', 'Contact form', 'failed', 'Email send failed'));
     return respond(req, 502, { ok: false, error: "Your message couldn't be sent." });
   }
-  ctx.waitUntil(forwardToFlow(inquiry, env));
+  report(env, ctx, atlasRun('benjaire-contact-worker', 'Contact form', 'ok'));
+  ctx.waitUntil(forwardToFlow(inquiry, env, ctx));
   return respond(req, 200, { ok: true });
 }
 
