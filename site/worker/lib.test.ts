@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { checkoutParams, cleanLine, composeEmail, flowPayload, formatNewYork, originAllowed, PAYMENT_LINKS, paymentLinkFor, postWithRetry, recipientFor, validate } from './lib.ts';
+import { checkoutParams, cleanLine, composeEmail, flowPayload, formatNewYork, originAllowed, PAYMENT_LINKS, paymentLinkFor, postWithRetry, recipientFor, SITE_CAP_KEYS, underSiteCap, validate } from './lib.ts';
 import { FLOW_CHECKOUT } from '../src/site.ts';
 
 const form = (fields: Record<string, string>) => {
@@ -162,4 +162,15 @@ test('flow forward gives up after three tries', async () => {
   const { result, calls } = await post([429, 502, 504, 200]);
   assert.equal(calls.length, 3);
   assert.deepEqual(result, { ok: false, attempts: 3, status: 504 });
+});
+
+test('site-wide cap blocks once the limiter says no, and never blocks without one', async () => {
+  const seen: string[] = [];
+  const limiter = (ok: boolean) => ({ limit: async ({ key }: { key: string }) => (seen.push(key), { success: ok }) });
+  assert.equal(await underSiteCap(limiter(true), SITE_CAP_KEYS.contact), true);
+  assert.equal(await underSiteCap(limiter(false), SITE_CAP_KEYS.checkout), false);
+  assert.deepEqual(seen, ['site:contact', 'site:checkout']);
+  assert.equal(await underSiteCap(undefined, SITE_CAP_KEYS.contact), true);
+  const broken = { limit: async () => { throw new Error('binding error'); } };
+  assert.equal(await underSiteCap(broken, SITE_CAP_KEYS.contact), true);
 });

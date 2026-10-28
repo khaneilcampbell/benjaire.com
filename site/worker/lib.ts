@@ -279,3 +279,21 @@ export function checkoutParams(tier: string, cfg: CheckoutTier, origin: string):
     'payment_intent_data[metadata][tier]': tier,
   });
 }
+
+// Site-wide caps on top of the per-visitor limit, so many addresses together
+// still can't send unlimited email or open unlimited Stripe sessions. The
+// SITE_LIMITER binding counts per Cloudflare location, per minute. A missing
+// binding (an older deploy) never blocks a real visitor.
+export const SITE_CAP_KEYS = { contact: 'site:contact', checkout: 'site:checkout' } as const;
+
+export async function underSiteCap(
+  limiter: { limit(opts: { key: string }): Promise<{ success: boolean }> } | undefined,
+  key: string,
+): Promise<boolean> {
+  if (!limiter) return true;
+  try {
+    return (await limiter.limit({ key })).success;
+  } catch {
+    return true;
+  }
+}
