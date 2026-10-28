@@ -117,7 +117,8 @@ export async function postWithRetry(
         method: 'POST',
         headers: init.headers,
         body: init.body,
-        signal: AbortSignal.timeout(opts.timeoutMs ?? 10_000),
+        // 3 tries x 8s + 4s of waits stays inside the 30s waitUntil window.
+        signal: AbortSignal.timeout(opts.timeoutMs ?? 8_000),
       });
       result = { ok: res.ok, attempts: attempt, status: res.status };
       retry = FLOW_RETRY_STATUS.has(res.status);
