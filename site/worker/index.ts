@@ -1,7 +1,7 @@
 // benjaire.com Worker. Static pages are served from ./dist by the assets
 // layer; only /api/* reaches this script (see wrangler.jsonc).
 import { EmailMessage } from 'cloudflare:email';
-import { buildMime, checkoutParams, composeEmail, flowPayload, hostAllowed, originAllowed, paymentLinkFor, recipientFor, validate, type CheckoutTier, type Inquiry } from './lib';
+import { buildMime, checkoutParams, composeEmail, flowPayload, hostAllowed, originAllowed, paymentLinkFor, postWithRetry, recipientFor, validate, type CheckoutTier, type Inquiry } from './lib';
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -41,16 +41,18 @@ async function verifyTurnstile(token: string, secret: string, ip: string | null)
 // never affects it: the email above stays the record if Flow is unreachable.
 async function forwardToFlow(inquiry: Inquiry, env: Env): Promise<void> {
   if (!env.FLOW_INTAKE_URL || !env.FLOW_INTAKE_KEY) return;
-  try {
-    const res = await fetch(env.FLOW_INTAKE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-flow-key': env.FLOW_INTAKE_KEY },
-      body: JSON.stringify(flowPayload(inquiry)),
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!res.ok) console.error('Flow intake returned', res.status);
-  } catch (err) {
-    console.error('Flow intake failed', err instanceof Error ? err.message : err);
+  const result = await postWithRetry(env.FLOW_INTAKE_URL, {
+    headers: {
+      'Content-Type': 'application/json',
+      'x-flow-key': env.FLOW_INTAKE_KEY,
+      'Idempotency-Key': crypto.randomUUID(),
+    },
+    body: JSON.stringify(flowPayload(inquiry)),
+  });
+  if (!result.ok) {
+    console.error('Flow intake failed', { attempts: result.attempts, status: result.status, error: result.error });
+  } else if (result.attempts > 1) {
+    console.log('Flow intake delivered after retry', { attempts: result.attempts });
   }
 }
 

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { checkoutParams, cleanLine, composeEmail, flowPayload, formatNewYork, originAllowed, PAYMENT_LINKS, paymentLinkFor, recipientFor, validate } from './lib.ts';
+import { checkoutParams, cleanLine, composeEmail, flowPayload, formatNewYork, originAllowed, PAYMENT_LINKS, paymentLinkFor, postWithRetry, recipientFor, validate } from './lib.ts';
 import { FLOW_CHECKOUT } from '../src/site.ts';
 
 const form = (fields: Record<string, string>) => {
@@ -126,4 +126,40 @@ test('checkout only accepts known tiers', () => {
   for (const tier of ['', 'done_for_you', 'constructor', '__proto__', 'toString', 'STARTER']) {
     assert.equal(paymentLinkFor(tier), undefined, tier);
   }
+});
+
+// Fake fetch that plays back responses (a number is a status, an Error is thrown).
+function scripted(steps: (number | Error)[]) {
+  const calls: RequestInit[] = [];
+  const fetchFn = (async (_url: string, init: RequestInit) => {
+    calls.push(init);
+    const step = steps[calls.length - 1];
+    if (step instanceof Error) throw step;
+    return new Response(null, { status: step });
+  }) as unknown as typeof fetch;
+  return { fetchFn, calls };
+}
+const named = (name: string) => Object.assign(new Error(name), { name });
+const post = (steps: (number | Error)[]) => {
+  const s = scripted(steps);
+  const run = postWithRetry('https://flow.example/hook', { headers: { 'Idempotency-Key': 'k1' }, body: '{}' }, { fetchFn: s.fetchFn, sleep: async () => {} });
+  return run.then((result) => ({ result, calls: s.calls }));
+};
+
+test('flow forward retries gateway errors and dropped connections, then succeeds', async () => {
+  const { result, calls } = await post([503, new TypeError('network connection lost'), 200]);
+  assert.deepEqual(result, { ok: true, attempts: 3, status: 200 });
+  assert.ok(calls.every((c) => (c.headers as Record<string, string>)['Idempotency-Key'] === 'k1'));
+});
+
+test('flow forward never retries a timeout or a plain 500, since n8n may have run', async () => {
+  assert.equal((await post([named('TimeoutError'), 200])).calls.length, 1);
+  assert.equal((await post([500, 200])).calls.length, 1);
+  assert.equal((await post([401, 200])).calls.length, 1);
+});
+
+test('flow forward gives up after three tries', async () => {
+  const { result, calls } = await post([429, 502, 504, 200]);
+  assert.equal(calls.length, 3);
+  assert.deepEqual(result, { ok: false, attempts: 3, status: 504 });
 });
