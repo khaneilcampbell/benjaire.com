@@ -33,6 +33,9 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version-file: site/.nvmrc
+          # .nvmrc says "22"; without this the runner's cached 22.x is used,
+          # which can lag behind the minimum Astro requires.
+          check-latest: true
           cache: npm
           cache-dependency-path: site/package-lock.json
 
