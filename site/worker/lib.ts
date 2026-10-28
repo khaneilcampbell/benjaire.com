@@ -89,6 +89,49 @@ export function flowPayload(i: Inquiry) {
   };
 }
 
+/**
+ * Sends a POST to the Flow webhook, retrying only when Flow can't have acted
+ * on it yet (same rule as the commerce pipeline's api_retry): a dropped
+ * connection, 429, or a 502/503/504 gateway error. A timeout or plain 500
+ * may mean n8n already ran, so it is not retried; the owner email stays the
+ * record. Each try carries the same Idempotency-Key so Flow can drop repeats.
+ */
+export const FLOW_RETRY_STATUS = new Set([429, 502, 503, 504]);
+export const FLOW_RETRY_DELAYS_MS = [1_000, 3_000];
+
+export type FlowResult = { ok: boolean; attempts: number; status?: number; error?: string };
+
+export async function postWithRetry(
+  url: string,
+  init: { headers: Record<string, string>; body: string },
+  opts: { fetchFn?: typeof fetch; delays?: number[]; sleep?: (ms: number) => Promise<unknown>; timeoutMs?: number } = {},
+): Promise<FlowResult> {
+  const fetchFn = opts.fetchFn ?? fetch;
+  const delays = opts.delays ?? FLOW_RETRY_DELAYS_MS;
+  const sleep = opts.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
+  for (let attempt = 1; ; attempt++) {
+    let retry = false;
+    let result: FlowResult;
+    try {
+      const res = await fetchFn(url, {
+        method: 'POST',
+        headers: init.headers,
+        body: init.body,
+        signal: AbortSignal.timeout(opts.timeoutMs ?? 10_000),
+      });
+      result = { ok: res.ok, attempts: attempt, status: res.status };
+      retry = FLOW_RETRY_STATUS.has(res.status);
+    } catch (err) {
+      const name = err instanceof Error ? err.name : '';
+      result = { ok: false, attempts: attempt, error: err instanceof Error ? err.message : String(err) };
+      // TimeoutError / AbortError: the request may have reached n8n.
+      retry = name !== 'TimeoutError' && name !== 'AbortError';
+    }
+    if (result.ok || !retry || attempt > delays.length) return result;
+    await sleep(delays[attempt - 1]);
+  }
+}
+
 /** Formats an ISO timestamp as New York local time, e.g. "Fri, Oct 16, 2026, 3:53 AM EDT". */
 export function formatNewYork(iso: string): string {
   const d = new Date(iso);
