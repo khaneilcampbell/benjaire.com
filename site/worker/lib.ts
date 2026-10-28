@@ -297,3 +297,33 @@ export async function underSiteCap(
     return true;
   }
 }
+
+// Run reports to AI Ops Atlas (POST /api/hooks/agents), so the contact and
+// Flow intake agents show real results there. Only the agent, the outcome and
+// a short reason are sent: never the visitor's name, email or message.
+export const ATLAS_PROJECT = 'benjaire-site';
+export type AtlasStatus = 'ok' | 'failed' | 'skipped';
+
+export function atlasRun(agent: string, phase: string, status: AtlasStatus, detail = '', at = new Date()) {
+  return { project: ATLAS_PROJECT, agents: [agent], phase, status, detail: detail.slice(0, 300), at: at.toISOString() };
+}
+
+export async function reportToAtlas(
+  url: string | undefined,
+  token: string | undefined,
+  run: ReturnType<typeof atlasRun>,
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  if (!url || !token) return;
+  try {
+    const res = await fetchImpl(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(run),
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!res.ok) console.error('Atlas report failed', res.status);
+  } catch (err) {
+    console.error('Atlas report failed', err instanceof Error ? err.message : err);
+  }
+}

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { checkoutParams, cleanLine, composeEmail, flowPayload, formatNewYork, originAllowed, PAYMENT_LINKS, paymentLinkFor, postWithRetry, recipientFor, SITE_CAP_KEYS, underSiteCap, validate } from './lib.ts';
+import { checkoutParams, cleanLine, composeEmail, flowPayload, formatNewYork, originAllowed, PAYMENT_LINKS, paymentLinkFor, postWithRetry, recipientFor, reportToAtlas, atlasRun, SITE_CAP_KEYS, underSiteCap, validate } from './lib.ts';
 import { FLOW_CHECKOUT } from '../src/site.ts';
 
 const form = (fields: Record<string, string>) => {
@@ -173,4 +173,26 @@ test('site-wide cap blocks once the limiter says no, and never blocks without on
   assert.equal(await underSiteCap(undefined, SITE_CAP_KEYS.contact), true);
   const broken = { limit: async () => { throw new Error('binding error'); } };
   assert.equal(await underSiteCap(broken, SITE_CAP_KEYS.contact), true);
+});
+
+test('Atlas run report carries only the agent, outcome and a short reason', () => {
+  const run = atlasRun('benjaire-contact-worker', 'Contact form', 'failed', 'x'.repeat(400), new Date('2026-10-28T14:00:00Z'));
+  assert.deepEqual(Object.keys(run).sort(), ['agents', 'at', 'detail', 'phase', 'project', 'status']);
+  assert.equal(run.project, 'benjaire-site');
+  assert.deepEqual(run.agents, ['benjaire-contact-worker']);
+  assert.equal(run.detail.length, 300);
+  assert.equal(run.at, '2026-10-28T14:00:00.000Z');
+});
+
+test('Atlas report is skipped without settings and never throws', async () => {
+  let calls = 0;
+  const ok = (async () => { calls++; return new Response(null, { status: 204 }); }) as typeof fetch;
+  const run = atlasRun('benjaire-flow-intake', 'Flow intake', 'ok');
+  await reportToAtlas(undefined, 'k', run, ok);
+  await reportToAtlas('https://atlas.example/api/hooks/agents', undefined, run, ok);
+  assert.equal(calls, 0);
+  let sent: RequestInit | undefined;
+  await reportToAtlas('https://atlas.example/api/hooks/agents', 'k', run, (async (_u: unknown, init?: RequestInit) => { sent = init; return new Response(null, { status: 401 }); }) as typeof fetch);
+  assert.equal((sent?.headers as Record<string, string>).Authorization, 'Bearer k');
+  await reportToAtlas('https://atlas.example/api/hooks/agents', 'k', run, (async () => { throw new Error('down'); }) as typeof fetch);
 });
