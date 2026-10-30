@@ -16,12 +16,18 @@ on:
 permissions:
   contents: read
 
+# A newer push cancels the older run of the same branch or PR
+concurrency:
+  group: site-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   ASTRO_TELEMETRY_DISABLED: "1"
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: site
