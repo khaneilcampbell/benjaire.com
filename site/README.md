@@ -1,8 +1,9 @@
 # benjaire.com (Astro)
 
 The Benjaire website, live at https://benjaire.com. It is built with Astro and
-deployed to Cloudflare Workers static assets (ADR-0002). The pages at the
-repository root are the retired GitHub Pages site.
+deployed to Cloudflare Workers static assets (ADR-0002). The retired GitHub
+Pages site was removed from the repository root after launch and survives only
+in git history.
 
 ## Run locally
 
@@ -49,7 +50,7 @@ and `CONTACT_TO=you@example.com`, then `npx wrangler dev`.
 | `src/pages/` | One file per page |
 | `src/content/brands/` | Brand entries (one JSON file per **publicly approved** brand) |
 | `src/scripts/contact.ts` | Contact form behaviour in the browser |
-| `worker/` | Cloudflare Worker for `/api/contact`: Turnstile check, validation, rate limit, email (`lib.ts` is unit-tested) |
+| `worker/` | Cloudflare Worker for `/api/contact` (Turnstile check, validation, rate limit, email, optional forward to the Flow intake) and `/api/checkout` (Stripe Checkout Session, with Payment Link fallback). `lib.ts` is unit-tested |
 | `scripts/security-headers.mjs` | Writes `dist/_headers` (CSP with inline-script hashes, HSTS, etc.) after each build |
 | `public/_redirects` | Permanent redirects from the legacy `.html` URLs |
 | `public/brand/` | Identity v4 logo files: charcoal, plus `-cream` (pearl) reverses. Regenerate with `node scripts/build-logos.mjs public/brand` |
