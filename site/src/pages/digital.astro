@@ -1,6 +1,6 @@
 ---
-// Digital Solutions: a business pillar offered directly by Benjaire (no
-// separate division brand). Built from existing components only.
+// Digital Solutions: Benjaire's one business, offered directly under the
+// Benjaire name. Built from existing components only.
 // Service categories lead. Benjaire Flow (the self install kit) is available
 // and has its own page at /digital/flow, as is Flow Installed (the kit set up
 // for the client). The wider intake service below, with CRM workflows, is
@@ -8,7 +8,6 @@
 import Base from '../layouts/Base.astro';
 import PageBand from '../components/PageBand.astro';
 import Booking from '../components/Booking.astro';
-import bandImg from '../assets/pages/digital.jpg';
 import { SITE } from '../site';
 
 const PROBLEMS = [
@@ -70,7 +69,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
         <a class="btn primary" href="/contact?category=digital#inquiry">Discuss your workflow <span aria-hidden="true">→</span></a>
         <a class="btn ghost" href="#services">See service categories</a>
       </div>
-      <PageBand src={bandImg} focus="right" alt="Detail of the pavilion's ribbed aluminum arch with a glass bridge passing through it" />
+      <PageBand label="Inquiries in · sorted · answered" />
     </div>
   </section>
 

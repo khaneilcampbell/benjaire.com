@@ -1,0 +1,77 @@
+---
+// Code-drawn visuals for Build, Operate and Grow (replaced the Pavilion crops
+// in v0.4). Night ground, pearl lines, one ice-blue live element each.
+// Decorative: the step text carries the meaning.
+interface Props { kind: 'build' | 'operate' | 'grow'; class?: string; i?: number }
+const { kind, class: cls, i } = Astro.props;
+const dots = Array.from({ length: 11 * 13 }, (_, n) => [30 + (n % 11) * 54, 30 + Math.floor(n / 11) * 54]);
+---
+<svg class:list={['model-visual', `mv-${kind}`, cls]} data-i={i} viewBox="0 0 600 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  <rect width="600" height="700" class="mv-ground" />
+  <g class="mv-dots">{dots.map(([x, y]) => <circle cx={x} cy={y} r="1.2" />)}</g>
+  {kind === 'build' && (
+    <g>
+      <rect class="mv-panel" x="96" y="150" width="300" height="190" rx="14" />
+      <rect class="mv-panel mv-b2" x="204" y="300" width="300" height="190" rx="14" />
+      <rect class="mv-panel mv-live" x="150" y="420" width="220" height="130" rx="14" />
+      <g class="mv-lines">
+        <path d="M124 186h140M124 212h220M124 238h180" />
+        <path d="M232 336h160M232 362h230M232 388h120" />
+      </g>
+      <path class="mv-ice" d="M178 456h120M178 482h160" />
+      <path class="mv-guide" d="M96 120v-40M396 120v-40M96 100h300" />
+      <text class="mv-label" x="96" y="72">BRIEF → DESIGN → LAUNCH</text>
+    </g>
+  )}
+  {kind === 'operate' && (
+    <g>
+      {[180, 280, 380, 480].map((y, n) => (
+        <g>
+          <path class="mv-lane" d={`M60 ${y}H540`} />
+          {[150, 300, 450].map((x) => <circle class="mv-node" cx={x} cy={y} r="7" />)}
+          <circle class:list={['mv-pulse', `mv-d${n}`]} cx="60" cy={y} r="5" />
+        </g>
+      ))}
+      <rect class="mv-panel mv-live" x="360" y="540" width="190" height="88" rx="14" />
+      <text class="mv-label" x="380" y="578">STATUS · WON</text>
+      <path class="mv-ice" d="M380 600h120" />
+      <text class="mv-label" x="60" y="120">INTAKE · SORT · REPLY · FOLLOW UP</text>
+    </g>
+  )}
+  {kind === 'grow' && (
+    <g>
+      <path class="mv-lane" d="M60 600H540M60 600V140" />
+      {[0, 1, 2, 3, 4, 5].map((n) => <rect class:list={['mv-bar', n === 5 && 'mv-bar-live']} x={92 + n * 74} y={560 - n * 64} width="44" height={40 + n * 64} rx="6" />)}
+      <path class="mv-curve" d="M80 560C200 540 300 430 380 330S500 190 540 160" />
+      <circle class="mv-pulse-end" cx="540" cy="160" r="6" />
+      <text class="mv-label" x="60" y="110">VALIDATE → STRENGTHEN → EXPAND</text>
+    </g>
+  )}
+</svg>
+
+<style>
+  .model-visual { display: block; width: 100%; height: 100%; background: var(--cocoa); }
+  .mv-ground { fill: var(--cocoa); }
+  .mv-dots circle { fill: rgba(232, 237, 243, .16); }
+  .mv-panel { fill: rgba(255, 255, 255, .04); stroke: rgba(232, 237, 243, .22); stroke-width: 1; }
+  .mv-panel.mv-live { stroke: var(--ice); fill: rgba(143, 179, 220, .08); }
+  .mv-lines path, .mv-guide { fill: none; stroke: rgba(232, 237, 243, .4); stroke-width: 6; stroke-linecap: round; }
+  .mv-guide { stroke-width: 1; stroke-dasharray: 4 6; }
+  .mv-ice { fill: none; stroke: var(--ice); stroke-width: 6; stroke-linecap: round; }
+  .mv-label { font-family: var(--mono); font-size: 13px; letter-spacing: .12em; fill: rgba(232, 237, 243, .6); }
+  .mv-lane { fill: none; stroke: rgba(232, 237, 243, .2); stroke-width: 1.5; }
+  .mv-node { fill: var(--cocoa); stroke: rgba(232, 237, 243, .5); stroke-width: 1.5; }
+  .mv-pulse, .mv-pulse-end { fill: var(--ice); }
+  .mv-bar { fill: rgba(232, 237, 243, .1); stroke: rgba(232, 237, 243, .22); }
+  .mv-bar-live { fill: rgba(143, 179, 220, .25); stroke: var(--ice); }
+  .mv-curve { fill: none; stroke: var(--ice); stroke-width: 2; }
+  @media (prefers-reduced-motion: no-preference) {
+    .mv-pulse { animation: mv-run 4.8s linear infinite; }
+    .mv-d1 { animation-delay: -1.2s; } .mv-d2 { animation-delay: -2.6s; } .mv-d3 { animation-delay: -3.7s; }
+    .mv-b2 { animation: mv-float 6s var(--ease) infinite alternate; }
+    .mv-pulse-end { animation: mv-glow 2.4s ease-in-out infinite; }
+  }
+  @keyframes mv-run { from { transform: translateX(0); } to { transform: translateX(480px); } }
+  @keyframes mv-float { to { transform: translateY(-10px); } }
+  @keyframes mv-glow { 50% { opacity: .35; } }
+</style>

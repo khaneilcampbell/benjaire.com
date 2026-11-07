@@ -1,0 +1,58 @@
+---
+// Flow's product hero, drawn in HTML: the prospect's form, the owner alert and
+// the sender's confirmation, layered with a little pointer depth (flow.ts).
+// Sample data throughout; the caption under it says so.
+import OwnerAlert from './OwnerAlert.astro';
+---
+<div class="fh" data-layers role="img" aria-label="Sample Flow screens: the prospect’s contact form, the owner alert with three status buttons, and the confirmation on the prospect’s phone">
+  <div class="fh-form fh-l1">
+    <p class="fh-url"><i></i><i></i><i></i><span>northwind.example/contact</span></p>
+    <div class="fh-form-body">
+      <p class="fh-k">Contact form</p>
+      <p class="fh-in">Dana Lee · Lee &amp; Co</p>
+      <p class="fh-in">dana@lee.example</p>
+      <p class="fh-in tall">Logo and site before our launch next week, budget around $5,000…</p>
+      <p class="fh-send">Send message</p>
+    </div>
+  </div>
+  <OwnerAlert class="fh-alert fh-l2" count="Sample data" />
+  <div class="fh-phone fh-l3">
+    <p class="fh-notch"></p>
+    <p class="fh-k">Inbox · Dana</p>
+    <p class="fh-from">Northwind Studio</p>
+    <p class="fh-subj">We received your inquiry</p>
+    <p class="fh-ref">Ref NW-1042 · Reply within 1 business day</p>
+    <p class="fh-book">Book a call</p>
+  </div>
+</div>
+
+<style>
+  .fh { position: relative; height: clamp(400px, 36vw, 500px); margin-top: clamp(48px, 6vw, 80px); border-radius: var(--radius-lg); background: radial-gradient(90% 80% at 70% 20%, rgba(143, 179, 220, .2), transparent 60%), radial-gradient(rgba(232, 237, 243, .12) 1px, transparent 1.2px) 0 0 / 24px 24px, var(--cocoa); overflow: hidden; }
+  .fh > :global(*) { position: absolute; transition: translate .9s var(--ease); }
+  .fh-l1 { translate: calc(var(--lx, 0) * -8px) calc(var(--ly, 0) * -6px); }
+  :global(.fh-l2) { translate: calc(var(--lx, 0) * 6px) calc(var(--ly, 0) * 4px); }
+  .fh-l3 { translate: calc(var(--lx, 0) * 16px) calc(var(--ly, 0) * 12px); }
+  .fh-form { left: 6%; top: 12%; width: min(360px, 34%); background: var(--paper); border-radius: var(--radius-md); box-shadow: var(--shadow-2); overflow: hidden; }
+  .fh-url { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--line); font: 400 10.5px/1 var(--mono); color: var(--fg-low); }
+  .fh-url i { width: 7px; height: 7px; border-radius: 50%; background: var(--surface); }
+  .fh-url span { margin-left: 8px; }
+  .fh-form-body { padding: 16px; display: grid; gap: 8px; }
+  .fh-k { font: 400 10px/1 var(--mono); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--fg-low); }
+  .fh-in { font-size: 13px; color: var(--fg-mid); padding: 8px 10px; border: 1px solid var(--line-mid); border-radius: var(--radius-sm); }
+  .fh-in.tall { min-height: 56px; }
+  .fh-send { justify-self: start; font-size: 12.5px; font-weight: 500; padding: 8px 14px; border-radius: var(--radius-pill); background: var(--fg); color: var(--on-accent); }
+  :global(.fh-alert) { left: 34%; top: 34%; z-index: 1; }
+  .fh-phone { z-index: 2; }
+  .fh-phone { right: 6%; top: 16%; width: 210px; padding: 14px 16px 18px; display: grid; gap: 8px; align-content: start; background: var(--paper); border-radius: 30px; box-shadow: var(--shadow-3), 0 0 0 6px var(--cocoa-2), 0 0 0 7px rgba(232, 237, 243, .2); }
+  .fh-notch { justify-self: center; width: 70px; height: 6px; border-radius: var(--radius-pill); background: var(--surface); margin-bottom: 8px; }
+  .fh-from { font-weight: 600; font-size: 14px; color: var(--fg); }
+  .fh-subj { font-size: 13px; color: var(--fg); }
+  .fh-ref { font: 400 10.5px/1.5 var(--mono); color: var(--fg-low); }
+  .fh-book { justify-self: start; margin-top: 6px; font-size: 12.5px; font-weight: 500; padding: 8px 14px; border-radius: var(--radius-pill); background: var(--signal); color: var(--paper); }
+  @media (max-width: 899px) {
+    .fh { height: auto; padding: 24px 16px; display: grid; gap: 16px; justify-items: center; }
+    .fh > :global(*) { position: static; translate: none; }
+    .fh-form, .fh-phone { display: none; }
+    :global(.fh-alert) { width: 100%; }
+  }
+</style>

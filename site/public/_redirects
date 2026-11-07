@@ -2,8 +2,11 @@
 /index.html / 301
 /about.html /about 301
 /contact.html /contact 301
-# Pages from the previous build that no longer exist; their content now lives on /brands.
-/companies.html /brands 301
-/companies /brands 301
-/insights.html /brands 301
-/insights /brands 301
+# Pages from earlier builds that no longer exist. Benjaire is Digital Solutions
+# only (Consumer Brands retired 2026-11), so they all land on /digital.
+/brands /digital 301
+/brands.html /digital 301
+/companies.html /digital 301
+/companies /digital 301
+/insights.html /digital 301
+/insights /digital 301

@@ -8,12 +8,12 @@ const form = (fields: Record<string, string>) => {
   for (const [k, v] of Object.entries(fields)) f.append(k, v);
   return f;
 };
-const good = { category: 'supplier', name: 'Alex Chen', email: 'alex@factory.example', company: 'Factory Co', message: 'We make laptop stands and would like to talk.', consent: 'on' };
+const good = { category: 'partnership', name: 'Alex Chen', email: 'alex@studio.example', company: 'Studio Co', message: 'We run a design agency and would like to partner on client automation.', consent: 'on' };
 
 test('accepts a complete inquiry', () => {
   const { inquiry, errors } = validate(form(good));
   assert.deepEqual(errors, {});
-  assert.equal(inquiry?.category, 'supplier');
+  assert.equal(inquiry?.category, 'partnership');
 });
 
 test('flags each invalid field', () => {
@@ -36,18 +36,18 @@ test('caps field lengths', () => {
 test('subject carries the category label', () => {
   const { inquiry } = validate(form(good));
   const { subject, text } = composeEmail(inquiry!, { receivedAt: '2026-10-13T00:00:00Z', host: 'benjaire.com' });
-  assert.equal(subject, '[Supplier / Manufacturing] Alex Chen · Factory Co');
-  assert.match(text, /Email:\s+alex@factory\.example/);
+  assert.equal(subject, '[Partnership] Alex Chen · Studio Co');
+  assert.match(text, /Email:\s+alex@studio\.example/);
 });
 
 test('builds the Flow intake payload with the category in the message', () => {
   const { inquiry } = validate(form(good));
   assert.deepEqual(flowPayload(inquiry!), {
     name: 'Alex Chen',
-    email: 'alex@factory.example',
-    company: 'Factory Co',
+    email: 'alex@studio.example',
+    company: 'Studio Co',
     phone: '',
-    message: 'Category: Supplier / Manufacturing\n\nWe make laptop stands and would like to talk.',
+    message: 'Category: Partnership\n\nWe run a design agency and would like to partner on client automation.',
     source: 'website',
     website: '',
   });
@@ -62,10 +62,10 @@ test('shows the received time in New York time', () => {
 });
 
 test('routes categories with an optional map and falls back otherwise', () => {
-  assert.equal(recipientFor('supplier', 'inbox@x.com'), 'inbox@x.com');
-  assert.equal(recipientFor('supplier', 'inbox@x.com', '{"supplier":"src@x.com"}'), 'src@x.com');
-  assert.equal(recipientFor('general', 'inbox@x.com', '{"supplier":"src@x.com"}'), 'inbox@x.com');
-  assert.equal(recipientFor('supplier', 'inbox@x.com', 'not json'), 'inbox@x.com');
+  assert.equal(recipientFor('partnership', 'inbox@x.com'), 'inbox@x.com');
+  assert.equal(recipientFor('partnership', 'inbox@x.com', '{"partnership":"src@x.com"}'), 'src@x.com');
+  assert.equal(recipientFor('general', 'inbox@x.com', '{"partnership":"src@x.com"}'), 'inbox@x.com');
+  assert.equal(recipientFor('partnership', 'inbox@x.com', 'not json'), 'inbox@x.com');
 });
 
 test('only our own origins may post', () => {
@@ -87,7 +87,7 @@ test('builds a valid plain-text MIME message', async () => {
     from: { name: 'Benjaire website', email: 'website@benjaire.com' },
     to: 'inbox@example.com',
     replyTo: { name: 'José "Q" Pérez', email: 'jose@example.com' },
-    subject: '[Brand Collaboration] José Pérez',
+    subject: '[Partnership] José Pérez',
     text: 'Hola — línea uno\nline two',
     messageId: '<abc@benjaire.com>',
     date: new Date('2026-10-13T00:00:00Z'),
@@ -102,7 +102,7 @@ test('builds a valid plain-text MIME message', async () => {
   const decoded = new TextDecoder().decode(Uint8Array.from(atob(body.replace(/\r\n/g, '')), (c) => c.charCodeAt(0)));
   assert.equal(decoded, 'Hola — línea uno\nline two');
   const subject = head.match(/^Subject: =\?UTF-8\?B\?(.+)\?=$/m)![1];
-  assert.equal(new TextDecoder().decode(Uint8Array.from(atob(subject), (c) => c.charCodeAt(0))), '[Brand Collaboration] José Pérez');
+  assert.equal(new TextDecoder().decode(Uint8Array.from(atob(subject), (c) => c.charCodeAt(0))), '[Partnership] José Pérez');
 });
 
 test('fallback payment links match the site buy buttons', () => {
@@ -210,6 +210,6 @@ test('Atlas inquiry carries the reply details and nothing about the visitor', ()
   const { inquiry } = validate(form(good));
   const body = atlasInquiry(inquiry!, 'id-1', '2026-11-01T06:00:00.000Z', 'benjaire.com');
   assert.deepEqual(Object.keys(body).sort(), ['category', 'category_label', 'company', 'email', 'host', 'id', 'message', 'name', 'received_at']);
-  assert.equal(body.category_label, 'Supplier / Manufacturing');
-  assert.equal(body.email, 'alex@factory.example');
+  assert.equal(body.category_label, 'Partnership');
+  assert.equal(body.email, 'alex@studio.example');
 });

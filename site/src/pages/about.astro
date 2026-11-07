@@ -1,71 +1,67 @@
 ---
-import { Picture } from 'astro:assets';
+// About: Benjaire is one business, Digital Solutions (Consumer Brands
+// retired 2026-11). Code-drawn visuals only, per design system v0.4.
 import Base from '../layouts/Base.astro';
 import PageBand from '../components/PageBand.astro';
-import bandImg from '../assets/pages/about.jpg';
+import ModelVisual from '../components/ModelVisual.astro';
 import { SITE } from '../site';
-// Pillar images reuse the approved Pavilion renders: the arch (systems) for
-// Digital Solutions, the canopy (where new brands take shape) for Consumer Brands.
-import archImg from '../assets/home/operate.jpg';
-import canopyImg from '../assets/home/build.jpg';
 
-const PILLARS = [
-  { name: 'Digital Solutions', status: 'In service validation', img: archImg, href: '/digital', link: 'Explore Digital Solutions',
-    text: 'Business automation, AI integration and workflow optimization for small professional services firms such as consulting firms and agencies. Currently in business development and service validation.' },
-  { name: 'Consumer Brands', status: 'In research and development', img: canopyImg, href: '/brands', link: 'See Consumer Brands',
-    text: 'Consumer technology, technology accessories, lifestyle products and ecommerce brands, each to launch under its own name. Currently in research and development.' },
+// What Benjaire offers today. Flow is available; the services are scoped per
+// client (see /digital). Never describe in-development work as available.
+const OFFER = [
+  { name: 'Benjaire Flow', status: 'Available now', href: '/digital/flow', link: 'Meet Benjaire Flow', kind: 'operate' as const,
+    text: 'The inquiry system for service firms: Claude sorts each website inquiry, you get one email with one tap status buttons, and reminders fire before anyone waits too long.' },
+  { name: 'Automation services', status: 'Scoped per client', href: '/digital', link: 'Explore Digital Solutions', kind: 'build' as const,
+    text: 'Business automation, AI integration and workflow optimization for small professional services firms such as consulting firms and agencies.' },
 ];
 ---
-<Base title="About" shareTitle="About Benjaire | Technology & Brand Development" pageType="AboutPage" description="Founded in New York in 2022, Benjaire develops digital solutions and consumer brands. See how the company works, what guides it and where it is focused.">
+<Base title="About" shareTitle="About Benjaire | Digital Solutions for Service Firms" pageType="AboutPage" description="Founded in New York in 2022, Benjaire builds workflow automation and digital systems for service firms. See how the company works and what guides it.">
   <section class="page-head">
     <div class="wrap">
       <p class="eyebrow">About Benjaire</p>
-      <h1>A company built around technology, design, and innovation.</h1>
-      <p class="lead">Benjaire is a New York company focused on developing digital solutions and consumer brands. Through technology, design, and strategic innovation, we create products, services, and experiences for modern businesses and consumers.</p>
-      <PageBand src={bandImg} focus="right" alt="The Benjaire pavilion seen across still water: a low canopy, a ribbed arch and a reaching ribbon on one shared base" />
+      <h1>Digital systems for the way service firms work.</h1>
+      <p class="lead">Benjaire is a New York company that builds workflow automation and digital systems for service firms. Its first product is Benjaire Flow, the inquiry system that makes sure every inquiry is answered on time.</p>
+      <PageBand label="Built for service firms" />
     </div>
   </section>
 
   <section class="sec band-section">
     <div class="wrap two">
       <div>
-        <p class="eyebrow">Our mission</p><p class="statement mb-5">To develop technology solutions and consumer brands that simplify everyday experiences and create meaningful value.</p>
-        <p class="eyebrow">Our vision</p><p class="statement">To build a diversified company recognized for innovative technology, thoughtful design, and modern consumer experiences.</p>
+        <p class="eyebrow">Our mission</p><p class="statement mb-5">To give service firms back the hours lost to admin, with systems that answer, sort and follow up for them.</p>
+        <p class="eyebrow">Our vision</p><p class="statement">To be the team small firms trust to run the systems behind their client work.</p>
       </div>
       <div>
         <p class="eyebrow">At a glance</p>
         <dl class="facts">
           <div class="fact"><dt>Headquarters</dt><dd>{SITE.location}</dd></div>
           <div class="fact"><dt>Established</dt><dd>{SITE.founded}</dd></div>
-          <div class="fact"><dt>Focus</dt><dd>Digital Solutions &middot; Consumer Brands</dd></div>
-          <div class="fact"><dt>Model</dt><dd>Technology and brand development</dd></div>
+          <div class="fact"><dt>Focus</dt><dd>Digital Solutions</dd></div>
+          <div class="fact"><dt>First product</dt><dd>Benjaire Flow</dd></div>
           <div class="fact"><dt>Contact</dt><dd>{SITE.email}</dd></div>
         </dl>
       </div>
     </div>
   </section>
 
-  <section class="sec raised band-section" aria-labelledby="structure">
+  <section class="sec raised band-section" aria-labelledby="offer">
     <div class="wrap">
       <div class="sec-head">
-        <div><p class="eyebrow">Our structure</p><h2 id="structure">One company. Two pillars.</h2></div>
-        <p class="muted">Both pillars operate directly under the Benjaire name, with one identity and one team accountable for each.</p>
+        <div><p class="eyebrow">What we offer</p><h2 id="offer">One product, <span>and the team behind it.</span></h2></div>
+        <p class="muted">Benjaire Flow is ready to install today. For anything beyond it, we scope the work with you first.</p>
       </div>
-      <ul class="pillar-cards">
-        {PILLARS.map((p) => (
+      <ul class="offer-cards">
+        {OFFER.map((o) => (
           <li>
-            <div class="pillar-media">
-              <Picture src={p.img} formats={['avif', 'webp']} widths={[480, 840]} sizes="(min-width: 900px) 44vw, 100vw" alt="" loading="lazy" />
-              <span class="glass pillar-status">{p.status}</span>
+            <div class="offer-media night">
+              <ModelVisual kind={o.kind} />
+              <span class="glass offer-status">{o.status}</span>
             </div>
-            <h3>{p.name}</h3>
-            <p>{p.text}</p>
-            <a class="link" href={p.href}>{p.link} <span aria-hidden="true">→</span></a>
+            <h3>{o.name}</h3>
+            <p>{o.text}</p>
+            <a class="link" href={o.href}>{o.link} <span aria-hidden="true">→</span></a>
           </li>
         ))}
-      </ul>
-      <ul class="rows">
-        <li class="row"><h3>One identity</h3><p>Strategy, design, operations and technology sit with Benjaire, so both pillars share the same standards and the same name behind them.</p></li>
       </ul>
     </div>
   </section>
@@ -74,38 +70,24 @@ const PILLARS = [
     <div class="wrap">
       <div class="sec-head">
         <div><p class="eyebrow">Our approach</p><h2 id="approach">How we work.</h2></div>
-        <p class="muted">Every solution and brand moves through the same three stages, with Benjaire accountable at every one.</p>
+        <p class="muted">Every system we build moves through the same three stages, with Benjaire accountable at every one.</p>
       </div>
       <ol class="pillars">
-        <li class="pillar"><span class="num" aria-hidden="true">01</span><h3>Build</h3><p>Technology solutions and consumer brands, from research and design to launch.</p></li>
-        <li class="pillar"><span class="num" aria-hidden="true">02</span><h3>Operate</h3><p>Lean, repeatable systems for service delivery, sourcing, partnerships and operations.</p></li>
-        <li class="pillar"><span class="num" aria-hidden="true">03</span><h3>Grow</h3><p>Validate demand, strengthen what works, then expand into new services and categories.</p></li>
+        <li class="pillar"><span class="num" aria-hidden="true">01</span><h3>Build</h3><p>Automation designed around how your business already runs, from the first conversation to launch.</p></li>
+        <li class="pillar"><span class="num" aria-hidden="true">02</span><h3>Operate</h3><p>Monitoring, fixes and small changes that keep each system useful as your business changes.</p></li>
+        <li class="pillar"><span class="num" aria-hidden="true">03</span><h3>Grow</h3><p>Check what each system saves, strengthen what works, then add the next workflow.</p></li>
       </ol>
     </div>
   </section>
 
-  <section class="sec raised band-section" aria-labelledby="focus">
-    <div class="wrap">
-      <div class="sec-head">
-        <div><p class="eyebrow">Focus areas</p><h2 id="focus">Where we focus.</h2></div>
-        <p class="muted">Benjaire builds in three categories and keeps to them.</p>
-      </div>
-      <ul class="rows">
-        <li class="row"><h3>Consumer technology</h3><p>Accessories for the devices people carry every day. Benjaire is exploring smartphone, laptop and audio accessories.</p></li>
-        <li class="row"><h3>Digital</h3><p>Online products and experiences, each built and sold under its brand's own name.</p></li>
-        <li class="row"><h3>Lifestyle</h3><p>Everyday products where considered design makes a visible difference.</p></li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="sec band-section" aria-labelledby="principles">
+  <section class="sec raised band-section" aria-labelledby="principles">
     <div class="wrap">
       <div class="sec-head"><div><p class="eyebrow">Principles</p><h2 id="principles">What guides us.</h2></div></div>
       <ul class="principles">
         <li class="principle"><h3>Build lean</h3><p>We keep costs and complexity low, and spend where it creates real value.</p></li>
         <li class="principle"><h3>Validate demand</h3><p>We test what customers need before investing heavily in a product or service.</p></li>
         <li class="principle"><h3>Systematize operations</h3><p>We build repeatable processes first, then automate them.</p></li>
-        <li class="principle"><h3>Expand strategically</h3><p>We add services, products or brands only after the opportunity is proven.</p></li>
+        <li class="principle"><h3>Expand strategically</h3><p>We add a new service or product only after the opportunity is proven.</p></li>
       </ul>
     </div>
   </section>
@@ -114,22 +96,19 @@ const PILLARS = [
     <div class="wrap">
       <img class="band-mark" src="/brand/benjaire-monogram-pearl.svg" alt="" width="53" height="56" />
       <h2 id="together">Interested in working together?</h2>
-      <p>Tell us about your business, product or idea.</p>
+      <p>Tell us how inquiries and client work run in your business today.</p>
       <div class="actions center"><a class="btn primary" href="/contact">Contact Benjaire</a></div>
     </div>
   </section>
 </Base>
 
 <style>
-  /* Two pillar cards with Pavilion imagery; tokens and components from global.css. */
-  .pillar-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); list-style: none; margin-bottom: var(--s-6); }
-  .pillar-cards li { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; min-width: 0; }
-  .pillar-media { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: 4px; overflow: hidden; background: var(--surface); margin-bottom: 8px; }
-  .pillar-media :global(picture), .pillar-media :global(img) { width: 100%; height: 100%; object-fit: cover; }
-  .pillar-media :global(img) { transition: transform 1.2s var(--ease); }
-  .pillar-cards li:hover .pillar-media :global(img) { transform: scale(1.03); }
-  .pillar-status { position: absolute; left: 16px; bottom: 16px; padding: 8px 12px; border-radius: 999px; font-family: var(--mono); font-size: 11px; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--fg); }
-  .pillar-cards h3 { font-size: clamp(28px, 2.6vw, 40px); font-weight: 360; letter-spacing: -.04em; }
-  .pillar-cards p { max-width: 52ch; }
-  @media (max-width: 900px) { .pillar-cards { grid-template-columns: minmax(0, 1fr); } }
+  /* Offer cards with code-drawn visuals; tokens and components from global.css. */
+  .offer-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); list-style: none; }
+  .offer-cards li { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; min-width: 0; }
+  .offer-media { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 8px; }
+  .offer-status { position: absolute; left: 16px; bottom: 16px; padding: 8px 12px; border-radius: var(--radius-pill); font-family: var(--mono); font-size: 11px; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--fg); }
+  .offer-cards h3 { font-size: clamp(28px, 2.6vw, 40px); font-weight: 360; letter-spacing: -.04em; }
+  .offer-cards p { max-width: 52ch; }
+  @media (max-width: 900px) { .offer-cards { grid-template-columns: minmax(0, 1fr); } }
 </style>

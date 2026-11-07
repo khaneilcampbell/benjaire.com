@@ -29,8 +29,8 @@ interface Props {
   ogImage?: string;
   ogImageAlt?: string;
 }
-const { title, shareTitle, description = SITE.metaDescription, noindex = false, pageType = 'WebPage', hero = false, ogImage: ogPath = '/og/benjaire-og.png', ogImageAlt = 'Benjaire: Building brands. Powering businesses.' } = Astro.props;
-const brandTitle = `${SITE.name} | Building brands. Powering businesses.`;
+const { title, shareTitle, description = SITE.metaDescription, noindex = false, pageType = 'WebPage', hero = false, ogImage: ogPath = '/og/benjaire-og.png', ogImageAlt = `Benjaire: ${SITE.slogan.join(' ')}` } = Astro.props;
+const brandTitle = `${SITE.name} | ${SITE.slogan.join(' ')}`;
 const tabTitle = title ? `${title} · ${SITE.name}` : SITE.name;
 // Share cards carry the tagline on the homepage; other pages share their descriptive title.
 const ogTitle = shareTitle ?? (title ? tabTitle : brandTitle);
@@ -54,7 +54,7 @@ const pageLd = noindex
           url: `${SITE.url}/`,
           logo: { '@type': 'ImageObject', url: `${SITE.url}/icons/logo-512.png`, width: 512, height: 512 },
           description: SITE.description,
-          slogan: 'Building brands. Powering businesses.',
+          slogan: SITE.slogan.join(' '),
           foundingDate: String(SITE.founded),
           address: { '@type': 'PostalAddress', addressLocality: 'New York', addressRegion: 'NY', addressCountry: 'US' },
           email: SITE.email,
@@ -93,7 +93,7 @@ const pageLd = noindex
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
-    <meta name="theme-color" content="#f3f3f1" />
+    <meta name="theme-color" content="#f4f6f8" />
     <link rel="preload" href={archivoVar} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={inter400} as="font" type="font/woff2" crossorigin />
     <!-- Tab icon: the bare graphite B on a transparent ground (pearl in dark

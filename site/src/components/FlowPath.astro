@@ -1,0 +1,102 @@
+---
+// How it works: four stops on one track that fills as it scrolls into view
+// (flow.ts sets --d; the fill is a scaleX, so it stays on the compositor).
+// The full architecture and every trigger sit behind "Technical detail".
+import { Picture } from 'astro:assets';
+import archImg from '../assets/flow/02-workflow-architecture.png';
+const STOPS = [
+  { k: 'Your site', name: 'Contact form', text: 'Your existing form posts each inquiry, unchanged for visitors.' },
+  { k: 'Cloudflare', name: 'Protected endpoint', text: 'The included Worker checks the intake key, bot protection and honeypot.' },
+  { k: 'Your n8n', name: 'Claude sorts it', text: 'Flow tags service, urgency and budget, drafts a reply and saves the record.' },
+  { k: 'Resend', name: 'Emails go out', text: 'Your owner alert and the sender’s confirmation, from your own domain.' },
+];
+const TRIGGERS: { n: string; when: string; src: string; steps: [string, boolean?][] }[] = [
+  { n: '1', when: 'Form submitted', src: 'Webhook · Flow 1', steps: [['Check key'], ['Clean fields'], ['Skip duplicates'], ['Claude sorts'], ['Save record'], ['Owner alert', true], ['Acknowledgement', true]] },
+  { n: '2', when: 'You tap “Became a client”', src: 'Email button · Flow 2', steps: [['Confirm page'], ['Verify token'], ['Status: won'], ['Log event'], ['Welcome email', true]] },
+  { n: '2', when: 'You tap “I replied” or “Close”', src: 'Email button · Flow 2', steps: [['Confirm page'], ['Verify token'], ['Status: replied or lost'], ['Reminders stop']] },
+  { n: '3', when: 'Reply target passes', src: 'Weekdays 9 · 1 · 5 · Flow 3', steps: [['Find overdue'], ['One reminder', true], ['Mark reminded']] },
+  { n: '4', when: 'Monday morning', src: 'Mondays 8am · Flow 4', steps: [['Count the week'], ['Weekly digest', true]] },
+  { n: '0', when: 'A step fails', src: 'Error trigger · Flow 0', steps: [['Find failing step'], ['Error alert, no customer data', true]] },
+];
+---
+<div class="path" data-path>
+  <div class="track" aria-hidden="true"><span class="fill"></span></div>
+  <ol class="stops">
+    {STOPS.map((s, i) => (
+      <li class="stop" data-n={i}>
+        <span class="node" aria-hidden="true"></span>
+        <p class="mono">{String(i + 1).padStart(2, '0')} · {s.k}</p>
+        <h3>{s.name}</h3>
+        <p>{s.text}</p>
+      </li>
+    ))}
+  </ol>
+</div>
+
+<details class="tech">
+  <summary>Technical detail <span class="mono">Architecture and every trigger</span></summary>
+  <div class="tech-body">
+    <figure class="tech-fig">
+      <Picture src={archImg} formats={['avif', 'webp']} widths={[800, 1400, 2000]} sizes="(min-width: 1320px) 1208px, 92vw" alt="Architecture: contact form, Cloudflare Worker, six n8n workflows with three data tables, Claude, Resend and inboxes, with a fallback email path" loading="lazy" />
+    </figure>
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Every trigger and what Flow does next">
+      <table class="triggers">
+        <caption class="mono">Events in, actions out. Dark steps are the emails that leave the system. Flow 5, data retention, is not shown.</caption>
+        <thead><tr><th scope="col">When this happens</th><th scope="col">Flow does this</th></tr></thead>
+        <tbody>
+          {TRIGGERS.map((t) => (
+            <tr>
+              <th scope="row"><div class="tw"><span class="tn" aria-hidden="true">{t.n}</span><span><b>{t.when}</b><span class="mono">{t.src}</span></span></div></th>
+              <td><ol class="chain">{t.steps.map(([x, mail]) => <li class:list={{ mail }}>{x}{mail && <span class="sr-only"> (email)</span>}</li>)}</ol></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</details>
+
+<style>
+  .path { position: relative; margin-top: var(--s-4); }
+  .track { position: absolute; left: 7px; right: 7px; top: 7px; height: 2px; background: var(--line-mid); border-radius: 2px; overflow: hidden; }
+  .fill { position: absolute; inset: 0; background: var(--signal); transform-origin: 0 50%; transform: scaleX(var(--d, 1)); }
+  .stops { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); }
+  .stop { position: relative; display: grid; gap: 8px; align-content: start; padding-top: 34px; }
+  .stop .node { position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); box-shadow: inset 0 0 0 2px var(--line-strong); transition: box-shadow var(--dur-base) var(--ease), background var(--dur-base); }
+  .stop.node-on .node, .path:not([data-live]) .node { background: var(--signal); box-shadow: 0 0 0 5px var(--signal-tint); }
+  .stop .mono { font-size: 11px; }
+  .stop h3 { font-size: clamp(20px, 1.8vw, 24px); }
+  .stop > p:last-child { font-size: 15px; }
+
+  .tech { margin-top: var(--s-5); border-block: 1px solid var(--line-mid); }
+  .tech summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 24px; padding-block: 20px; font-weight: 500; color: var(--fg); }
+  .tech summary::-webkit-details-marker { display: none; }
+  .tech summary .mono { font-size: 11px; }
+  .tech summary::after { content: "+"; margin-left: auto; font-family: var(--mono); color: var(--fg-low); }
+  .tech[open] summary::after { content: "−"; }
+  .tech-body { display: grid; gap: var(--s-4); padding-bottom: var(--s-4); }
+  .tech-fig { margin: 0; }
+  .tech-fig :global(img) { display: block; width: 100%; height: auto; border-radius: var(--radius-sm); }
+  .tbl-wrap:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+  .tbl-wrap { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  .triggers { width: 100%; border-collapse: collapse; min-width: 640px; }
+  .triggers caption { caption-side: bottom; text-align: left; padding: 14px 20px; font-size: 11px; }
+  .triggers thead th { font: 400 10.5px/1 var(--mono); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--fg-low); text-align: left; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .triggers tbody th, .triggers td { padding: 16px 20px; border-bottom: 1px solid var(--line); vertical-align: middle; text-align: left; }
+  .triggers tbody th { font-weight: 400; width: 300px; }
+  .tw { display: flex; gap: 14px; align-items: center; }
+  .triggers tbody th b { display: block; font-weight: 600; color: var(--fg); }
+  .triggers tbody th .mono { font-size: 10.5px; }
+  .tn { flex: none; width: 32px; height: 32px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--fg); color: var(--on-accent); font: 400 12px/1 var(--mono); }
+  .chain { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; }
+  .chain li { position: relative; font-size: 13px; padding: 6px 11px; border: 1px solid var(--line-mid); border-radius: var(--radius-sm); color: var(--fg); background: var(--paper); }
+  .chain li + li::before { content: "→"; position: absolute; left: -18px; top: 50%; transform: translateY(-50%); color: var(--fg-faint); }
+  .chain li.mail { background: var(--fg); color: var(--on-accent); border-color: var(--fg); }
+
+  @media (max-width: 899px) {
+    .stops { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
+    .stop { padding: 0 0 0 36px; }
+    .track { left: 7px; right: auto; top: 8px; bottom: 8px; width: 2px; height: auto; }
+    .fill { transform-origin: 50% 0; transform: scaleY(var(--d, 1)); }
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+// What changes: three outcome cards drawn in code. Every number is sample data
+// and says so; none is a claim about real customers. flow.ts lets the ring and
+// bars settle in once (transform and opacity only) from a complete still frame.
+// Bar lengths below are n / 14, set in CSS because the CSP blocks inline styles.
+const PIPE = [
+  { k: 'New', n: 14 }, { k: 'Replied', n: 11 }, { k: 'Won', n: 4, live: true }, { k: 'Closed', n: 6 },
+];
+---
+<ul class="outcomes" data-outcomes>
+  <li class="oc">
+    <p class="mono oc-k">Reply time</p>
+    <div class="ring" aria-hidden="true">
+      <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" class="ring-bg" /><circle cx="60" cy="60" r="50" class="ring-fg" pathLength="100" /></svg>
+      <p><b>2h 40m</b><span class="mono">Median</span></p>
+    </div>
+    <h3>Every inquiry has an owner and a clock.</h3>
+    <p>Reminders fire before your reply target passes, so nobody waits too long.</p>
+    <p class="mono oc-note">Sample data</p>
+  </li>
+  <li class="oc">
+    <p class="mono oc-k">This week’s pipeline</p>
+    <ul class="pipe" aria-label="Sample pipeline">
+      {PIPE.map((p) => <li class:list={{ live: p.live }}><span>{p.k}</span><i aria-hidden="true"><b></b></i><span class="mono">{p.n}</span></li>)}
+    </ul>
+    <h3>See who is waiting at a glance.</h3>
+    <p>One tap status buttons keep the record current without opening n8n.</p>
+    <p class="mono oc-note">Sample data</p>
+  </li>
+  <li class="oc">
+    <p class="mono oc-k">Monday digest</p>
+    <div class="digest" aria-hidden="true">
+      <p class="dg-t">Your week in inquiries</p>
+      <p><span>New</span><b>14</b></p>
+      <p><span>Won</span><b class="won">4</b></p>
+      <p><span>Median time to handle</span><b>2h 40m</b></p>
+      <p><span>Still waiting</span><b>2</b></p>
+    </div>
+    <h3>A weekly summary in your inbox.</h3>
+    <p>Wins, losses, who is still waiting and what people asked about.</p>
+    <p class="mono oc-note">Sample data</p>
+  </li>
+</ul>
+
+<style>
+  .outcomes { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-3); }
+  .oc { display: flex; flex-direction: column; gap: 12px; padding: var(--s-4); background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-1); min-width: 0; }
+  .oc-k { font-size: 11px; }
+  .oc h3 { font-size: clamp(20px, 1.8vw, 24px); margin-top: auto; }
+  .oc > p:not(.mono) { font-size: 15px; }
+  .oc-note { font-size: 10.5px; color: var(--fg-low); }
+  .ring { position: relative; width: 156px; aspect-ratio: 1; margin-block: 8px 12px; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 9; }
+  .ring-bg { stroke: var(--bg-raised); }
+  .ring-fg { stroke: var(--signal); stroke-linecap: round; stroke-dasharray: 72 100; }
+  .ring p { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 4px; }
+  .ring b { font: 330 22px/1 var(--display); font-stretch: 112%; letter-spacing: -.03em; color: var(--fg); font-variant-numeric: tabular-nums; }
+  .ring .mono { font-size: 10px; }
+  .pipe { list-style: none; display: grid; gap: 10px; margin-block: 8px 12px; }
+  .pipe li { display: grid; grid-template-columns: 64px minmax(0, 1fr) 24px; align-items: center; gap: 10px; font-size: 13px; color: var(--fg-mid); }
+  .pipe .mono { text-align: right; color: var(--fg); font-variant-numeric: tabular-nums; }
+  .pipe i { height: 8px; border-radius: var(--radius-pill); background: var(--bg-raised); overflow: hidden; }
+  .pipe i b { display: block; height: 100%; width: 100%; border-radius: inherit; background: var(--fg-faint); transform-origin: 0 50%; transform: scaleX(calc(var(--w) * var(--on, 1))); transition: transform var(--dur-slow) var(--ease); }
+  .pipe li.live i b { background: var(--signal); }
+  .pipe li:nth-child(1) { --w: 1; } .pipe li:nth-child(2) { --w: .79; } .pipe li:nth-child(3) { --w: .29; } .pipe li:nth-child(4) { --w: .43; }
+  .digest { display: grid; gap: 8px; margin-block: 8px 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--canvas); }
+  .digest p { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; color: var(--fg-mid); }
+  .digest b { color: var(--fg); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .digest b.won { color: var(--won); }
+  .dg-t { font-weight: 600; color: var(--fg) !important; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  @media (prefers-reduced-motion: no-preference) {
+    .ring svg { transition: transform var(--dur-slow) var(--ease), opacity var(--dur-slow); }
+    .outcomes[data-wait] .ring svg { transform: rotate(-200deg); opacity: 0; }
+  }
+  @media (max-width: 1000px) { .outcomes { grid-template-columns: minmax(0, 1fr); } }
+</style>

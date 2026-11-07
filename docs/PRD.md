@@ -1,5 +1,7 @@
 # Benjaire.com — Product Requirements Document (v0.2)
 
+> **Update 2026-11-07: Consumer Brands retired.** Benjaire is now one business, **Digital Solutions** (workflow automation and digital systems for service firms; first product Benjaire Flow). Everything below about brands, the Brands page, the brand content model, suppliers and manufacturing is **retired** and kept only as history: §3.3, §3.5, §4.3, US-2, US-4 and the brand rows in §4.1, §11 and §12. `/brands` now redirects to `/digital`, and the contact categories are Digital Solutions, General Business Inquiry and Partnership. Slogan: "Smarter systems. Better business."
+
 | | |
 |---|---|
 | **Status** | **Approved by owner 2026-10-13** (M0). Each later milestone has its own approval gate. |
@@ -70,7 +72,7 @@ The previous three-page limit is retired. New pages are added **only when they s
 - No founder name, personal photographs, biographies, personal addresses, or private contact details without explicit approval.
 - The site must stay separate from any personal or professional portfolio sites (no cross-links).
 
-### 3.3 Brands [CONFIRMED]
+### 3.3 Brands [RETIRED 2026-11-07]
 - A scalable Brands page that supports name, description, logo, website URL, and development status.
 - Brands can be added, updated, or removed without significant code changes.
 - **No invented brand names, launches, or portfolio entries.**
@@ -85,7 +87,7 @@ The previous three-page limit is retired. New pages are added **only when they s
 - Spam prevention, input validation, and secure server-side processing.
 - No email address is shown publicly unless it is configured and working.
 
-### 3.5 Suppliers & manufacturing [CONFIRMED]
+### 3.5 Suppliers & manufacturing [RETIRED 2026-11-07]
 - Benjaire is *exploring* supplier relationships for consumer technology accessories, smartphone accessories, laptop accessories, audio device accessories, and lifestyle products.
 - Sourcing interest: China and other international manufacturing markets.
 - **No** minimum order quantities. **No** claims about existing partnerships, production capabilities, or supplier relationships.
@@ -137,7 +139,7 @@ The previous three-page limit is retired. New pages are added **only when they s
 | F-9 | Documented design system and tokens | CONFIRMED |
 | F-10 | HTTP security headers (CSP, HSTS, frame-ancestors) | PROPOSED; depends on the hosting decision |
 
-### 4.3 Brand content model [PROPOSED]
+### 4.3 Brand content model [RETIRED 2026-11-07]
 
 One file per **publicly approved** brand:
 
@@ -167,7 +169,7 @@ Individual brand sites hosted here, e-commerce, customer accounts, partner colla
 - AC2: The copy is company-first. No individual's name, photo, or bio appears anywhere on the site.
 - AC3: Mobile LCP is ≤ 2.5s (lab test, simulated 4G).
 
-**US-2 — Browse public brands.** *As a partner or consumer, I want to see Benjaire's public brands and visit them.*
+**US-2 — Browse public brands. [RETIRED 2026-11-07]** *As a partner or consumer, I want to see Benjaire's public brands and visit them.*
 - AC1: The Brands page renders only from brand content files.
 - AC2: With **zero** files, the page shows the empty state, and the Home teaser is hidden or shows the same message. No placeholder entries appear.
 - AC3: With one or more files, each card shows the name, logo (with alt text), category, description, and status. `live` cards link out with `rel="noopener noreferrer"` and an accessible "(opens external site)" label.
@@ -184,7 +186,7 @@ Individual brand sites hosted here, e-commerce, customer accounts, partner colla
 - AC7: Success and failure states are clear. On failure, the visitor's input is kept and the direct email address is shown.
 - AC8: No secret key appears in client-side code or in the repository.
 
-**US-4 — Supplier orientation.** *As a manufacturer, I want to know whether to reach out.*
+**US-4 — Supplier orientation. [RETIRED 2026-11-07]** *As a manufacturer, I want to know whether to reach out.*
 - AC1: The Contact page lists the confirmed areas of interest and sourcing regions, phrased as "exploring" or "interested in".
 - AC2: The page shows no MOQs, no partner names, and no capability claims.
 - AC3: The "Supplier inquiry" call to action pre-selects the Supplier / Manufacturing category.

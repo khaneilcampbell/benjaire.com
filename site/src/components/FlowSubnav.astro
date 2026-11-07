@@ -1,0 +1,34 @@
+---
+// Product sub-nav for Benjaire Flow pages: the "B + Flow" lockup (never a
+// separate logo) and in-page links. Sits under the site nav and sticks to it.
+const LINKS = [
+  { href: '#overview', label: 'Overview' },
+  { href: '#how', label: 'How it works' },
+  { href: '#pricing', label: 'Pricing' },
+  { href: '#faq', label: 'FAQ' },
+];
+---
+<nav class="flow-subnav" aria-label="Benjaire Flow">
+  <div class="wrap">
+    <a class="flow-lockup" href="#overview">
+      <img src="/brand/benjaire-monogram-graphite.svg" alt="" width="17" height="18" />
+      <span>Benjaire <b>Flow</b></span>
+    </a>
+    <ul>
+      {LINKS.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+    </ul>
+  </div>
+</nav>
+
+<style>
+  .flow-subnav { position: sticky; top: var(--nav-h); z-index: 40; background: var(--nav-bg); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); }
+  .flow-subnav .wrap { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); min-height: 48px; max-width: 1600px; }
+  .flow-lockup { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); font-family: var(--display); font-stretch: 112%; font-size: 15px; letter-spacing: -.01em; white-space: nowrap; }
+  .flow-lockup b { font-weight: 600; }
+  .flow-subnav ul { display: flex; gap: clamp(14px, 2.4vw, 32px); list-style: none; overflow-x: auto; scrollbar-width: none; }
+  .flow-subnav ul::-webkit-scrollbar { display: none; }
+  .flow-subnav ul a { display: inline-block; padding-block: 12px; font-size: 13px; color: var(--fg-mid); text-decoration: none; white-space: nowrap; }
+  .flow-subnav ul a:hover { color: var(--signal); }
+  /* Visually hidden on small phones; the link keeps its name. */
+  @media (max-width: 560px) { .flow-lockup span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } }
+</style>

@@ -1,0 +1,60 @@
+---
+// One screen of the Flow story (FlowStory.astro). Sample data only.
+interface Props { i: number }
+const { i } = Astro.props;
+---
+{i === 0 && (
+  <div class="ss">
+    <p class="ss-k">Contact form</p>
+    <p class="ss-in">Dana Lee · Lee &amp; Co</p>
+    <p class="ss-in">dana@lee.example</p>
+    <p class="ss-in tall">Logo and site before our launch next week, budget around $5,000…</p>
+    <p class="ss-btn">Send message</p>
+  </div>
+)}
+{i === 1 && (
+  <div class="ss">
+    <p class="ss-k">Claude’s sorting</p>
+    <p class="ss-tags"><span>Branding</span><span class="urgent">Urgent</span><span>$5,000</span></p>
+    <p class="ss-quote">“Needs a refreshed logo and website before a product launch next week.”</p>
+    <p class="ss-k ss-gap">Saved · Confirmation sent</p>
+    <p class="ss-ok">Ref NW-1042 · Reply within 1 business day</p>
+  </div>
+)}
+{i === 2 && (
+  <div class="ss">
+    <p class="ss-k">Owner alert</p>
+    <p class="ss-title">[Urgent] New inquiry: Dana Lee, Lee &amp; Co</p>
+    <p class="ss-quote">Hi Dana, thank you for reaching out. A launch next week is a tight window…</p>
+    <p class="ss-acts"><span>I replied</span><span class="hl">Became a client</span><span class="o">Close</span></p>
+  </div>
+)}
+{i === 3 && (
+  <div class="ss">
+    <p class="ss-k">Welcome email</p>
+    <p class="ss-title">Welcome to Northwind Studio: your next steps</p>
+    <ol class="ss-list"><li>Send us a few things</li><li>Book the kickoff call</li><li>We get started</li></ol>
+    <p class="ss-won">Status: won</p>
+  </div>
+)}
+
+<style>
+  .ss { display: grid; gap: 10px; align-content: start; padding: 18px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-md); }
+  .ss-k { font: 400 10.5px/1 var(--mono); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--fg-low); }
+  .ss-gap { margin-top: 6px; }
+  .ss-in { font-size: 14px; color: var(--fg-mid); padding: 9px 12px; border: 1px solid var(--line-mid); border-radius: var(--radius-sm); }
+  .ss-in.tall { min-height: 64px; }
+  .ss-btn { justify-self: start; font-size: 13px; font-weight: 500; padding: 9px 15px; border-radius: var(--radius-pill); background: var(--fg); color: var(--on-accent); }
+  .ss-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ss-tags span { font-size: 12.5px; font-weight: 500; padding: 5px 11px; border-radius: var(--radius-pill); background: var(--bg); color: var(--fg); }
+  .ss-tags .urgent { background: var(--danger-tint); color: var(--danger); }
+  .ss-quote { font-size: 14px; line-height: 1.5; color: var(--fg-mid); border-left: 2px solid var(--line-mid); padding-left: 12px; }
+  .ss-ok { font: 400 12px/1.4 var(--mono); color: var(--signal); }
+  .ss-title { font-weight: 600; font-size: 15.5px; line-height: 1.3; color: var(--fg); }
+  .ss-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ss-acts span { font-size: 12.5px; font-weight: 500; padding: 9px 13px; border-radius: var(--radius-pill); background: var(--fg); color: var(--on-accent); }
+  .ss-acts .hl { background: var(--signal); }
+  .ss-acts .o { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 1px var(--line-mid); }
+  .ss-list { list-style: decimal inside; display: grid; gap: 6px; font-size: 14px; color: var(--fg-mid); }
+  .ss-won { justify-self: start; font-size: 12.5px; font-weight: 500; padding: 5px 11px; border-radius: var(--radius-pill); background: var(--won-tint); color: var(--won); }
+</style>

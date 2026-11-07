@@ -40,25 +40,19 @@ and `CONTACT_TO=you@example.com`, then `npx wrangler dev`.
 
 | Path | What |
 |---|---|
-| `src/site.ts` | Company facts, nav, inquiry categories, supplier areas |
+| `src/site.ts` | Company facts, slogan, nav, inquiry categories, Flow checkout links |
 | `src/styles/global.css` | Design tokens and styles (see `docs/design-system.md`) |
 | `src/styles/home.css`, `src/scripts/home.ts` | Homepage layout and motion |
 | `src/layouts/Base.astro` | Page shell: meta tags, JSON-LD, nav, footer |
 | `src/components/` | Shared components, including `LogoMark.astro` and `PageBand.astro` |
-| `src/assets/` | Pavilion renders for the homepage and inner pages |
+| `src/assets/` | Flow product images (`flow/`) |
 | `src/pages/` | One file per page |
-| `src/content/brands/` | Brand entries (one JSON file per **publicly approved** brand) |
 | `src/scripts/contact.ts` | Contact form behaviour in the browser |
 | `worker/` | Cloudflare Worker for `/api/contact`: Turnstile check, validation, rate limit, email (`lib.ts` is unit-tested) |
 | `scripts/security-headers.mjs` | Writes `dist/_headers` (CSP with inline-script hashes, HSTS, etc.) after each build |
 | `public/_redirects` | Permanent redirects from the legacy `.html` URLs |
 | `public/brand/` | Identity v4 logo files: charcoal, plus `-cream` (pearl) reverses. Regenerate with `node scripts/build-logos.mjs public/brand` |
 | `public/brand/email/` | PNG logos for email clients that do not render SVG (header lockup, signature tile and wordmark, 512px avatar), rendered at 3× from the SVGs above. `email-header-lockup-pearl.png` is the pearl gradient lockup for the dark email header (`docs/design/logo/v3/svg/*-pearl.svg`); `email-header-lockup-graphite.png`, `email-mark-tile-pearl.png` and `benjaire-avatar-2048.png` follow the primary logo (graphite gradient on pearl, `docs/design/logo/v3/svg/*-graphite.svg`). Referenced by absolute URL from outgoing emails, so keep the file names stable |
-
-## Adding a brand
-
-See `src/content/brands/README.md`. This repository is public: never commit
-unreleased brands.
 
 ## Cloudflare settings (Workers & Pages → Create → Import a repository)
 
@@ -83,7 +77,7 @@ In the current dashboard these live under **Settings → Builds**: the **Product
 |---|---|
 | `TURNSTILE_SECRET_KEY` | Secret key of the Turnstile widget |
 | `CONTACT_TO` | The verified Email Routing destination that receives inquiries |
-| `CATEGORY_RECIPIENTS` (optional) | JSON such as `{"supplier":"sourcing@benjaire.com"}` to route a category elsewhere; each address must be a verified destination |
+| `CATEGORY_RECIPIENTS` (optional) | JSON such as `{"partnership":"partners@benjaire.com"}` to route a category elsewhere; each address must be a verified destination |
 | `FLOW_INTAKE_URL` (optional) | Benjaire Flow intake webhook, `https://<your-n8n-instance>/webhook/flow-intake`. With `FLOW_INTAKE_KEY` set, each delivered inquiry is also forwarded to Flow (AI sorting, owner alert with status buttons, acknowledgement to the sender) |
 | `STRIPE_SECRET_KEY` (optional) | Stripe secret key for `/api/checkout`. Use a **restricted key** with only *Checkout Sessions: Write*. Production gets the live key; previews get an `sk_test_` key plus test-mode price IDs in `previews.vars.STRIPE_TIERS`. Without it, buy buttons fall back to the Stripe Payment Links (no cancel page) |
 | `FLOW_INTAKE_KEY` (optional) | The Flow intake key (the `intake_key` in n8n's `flow_settings` table), sent as the `x-flow-key` header |
