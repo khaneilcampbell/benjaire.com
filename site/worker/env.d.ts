@@ -12,6 +12,10 @@ interface Env {
   FLOW_INTAKE_KEY?: string;
   /** Stripe secret key for Checkout Sessions (sk_live_ in production, sk_test_ in previews). */
   STRIPE_SECRET_KEY?: string;
+  /** Kill switch: "1" stops contact emails and the Flow forward. Unset keeps them on. */
+  CONTACT_PAUSED?: string;
+  /** Kill switch: "1" stops Stripe API calls; buyers go to the Payment Link. Unset keeps them on. */
+  CHECKOUT_PAUSED?: string;
   /** Optional AI Ops Atlas run feed, e.g. https://ai-ops-atlas.pages.dev/api/hooks/agents. */
   ATLAS_FEED_URL?: string;
   /** Atlas's write-only AGENT_FEED_TOKEN. Both must be set to report runs. */

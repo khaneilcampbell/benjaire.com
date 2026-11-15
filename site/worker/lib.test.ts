@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { atlasInboxUrl, atlasInquiry, checkoutParams, cleanLine, composeEmail, flowPayload, formatNewYork, originAllowed, PAYMENT_LINKS, paymentLinkFor, postWithRetry, recipientFor, reportToAtlas, atlasRun, SITE_CAP_KEYS, underSiteCap, validate } from './lib.ts';
+import { atlasInboxUrl, atlasInquiry, checkoutParams, cleanLine, composeEmail, flowPayload, formatNewYork, isPaused, originAllowed, PAYMENT_LINKS, paymentLinkFor, postWithRetry, recipientFor, reportToAtlas, atlasRun, SITE_CAP_KEYS, underSiteCap, validate } from './lib.ts';
 import { FLOW_CHECKOUT } from '../src/site.ts';
 
 const form = (fields: Record<string, string>) => {
@@ -212,4 +212,9 @@ test('Atlas inquiry carries the reply details and nothing about the visitor', ()
   assert.deepEqual(Object.keys(body).sort(), ['category', 'category_label', 'company', 'email', 'host', 'id', 'message', 'name', 'received_at']);
   assert.equal(body.category_label, 'Supplier / Manufacturing');
   assert.equal(body.email, 'alex@factory.example');
+});
+
+test('kill switches stay off unless clearly turned on', () => {
+  for (const on of ['1', 'true', 'TRUE', ' yes ', 'on']) assert.equal(isPaused(on), true, on);
+  for (const off of [undefined, '', '0', 'false', 'no', 'off', 'paused?', 1]) assert.equal(isPaused(off), false, String(off));
 });

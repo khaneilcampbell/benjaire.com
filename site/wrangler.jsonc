@@ -8,6 +8,8 @@
 // Secrets (set in the dashboard, never in this public repo):
 //   TURNSTILE_SECRET_KEY  Turnstile secret for the contact form
 //   CONTACT_TO            verified Email Routing destination for inquiries
+// Kill switches (optional, set as dashboard secrets so deploys keep them):
+//   CONTACT_PAUSED / CHECKOUT_PAUSED  "1" stops that path (docs/runbooks/kill-switches.md)
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "benjaire-com",

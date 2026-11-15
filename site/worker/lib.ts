@@ -280,6 +280,17 @@ export function checkoutParams(tier: string, cfg: CheckoutTier, origin: string):
   });
 }
 
+// Kill switches. Set CONTACT_PAUSED or CHECKOUT_PAUSED to "1" (or "true",
+// "yes", "on") as a plain-text variable in the Cloudflare dashboard to stop
+// that path without a deploy; unset, empty or anything else keeps today's
+// behaviour. Contact paused: no email, no Flow forward, the visitor is told the
+// form is paused. Checkout paused: the Worker makes no Stripe API calls and
+// sends buyers to the tier's Payment Link (turn that off in Stripe to stop
+// sales entirely). See docs/runbooks/kill-switches.md.
+export function isPaused(value: unknown): boolean {
+  return typeof value === 'string' && ['1', 'true', 'yes', 'on'].includes(value.trim().toLowerCase());
+}
+
 // Site-wide caps on top of the per-visitor limit, so many addresses together
 // still can't send unlimited email or open unlimited Stripe sessions. The
 // SITE_LIMITER binding counts per Cloudflare location, per minute. A missing
