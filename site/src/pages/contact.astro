@@ -1,18 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageBand from '../components/PageBand.astro';
-import bandImg from '../assets/pages/contact.jpg';
-import { CATEGORIES, SITE, SUPPLIER_AREAS, TURNSTILE_SITE_KEY } from '../site';
+import { CATEGORIES, SITE, TURNSTILE_SITE_KEY } from '../site';
 import Booking from '../components/Booking.astro';
 ---
-<Base title="Contact" shareTitle="Contact Benjaire | Digital Solutions and Partnerships" pageType="ContactPage" description="Contact Benjaire in New York about digital solutions, business partnerships, supplier and manufacturing inquiries, or general questions about the company.">
+<Base title="Contact" shareTitle="Contact Benjaire | Digital Solutions and Partnerships" pageType="ContactPage" description="Contact Benjaire in New York about digital solutions, Benjaire Flow, business partnerships or general questions about the company.">
   <script slot="head" src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <section class="page-head">
     <div class="wrap">
       <p class="eyebrow">Get in touch</p>
       <h1>Let's talk.</h1>
-      <p class="lead">Digital solutions, partnerships, suppliers and general company inquiries. Every message is reviewed directly by our team.</p>
-      <PageBand src={bandImg} alt="A stone walkway across still water leading to the entrance of the Benjaire pavilion" />
+      <p class="lead">Digital solutions, Benjaire Flow, partnerships and general company inquiries. Every message is reviewed directly by our team.</p>
+      <PageBand label="Every message reaches the right person" />
     </div>
   </section>
 
@@ -90,17 +89,6 @@ import Booking from '../components/Booking.astro';
 
   <Booking eyebrow="Prefer to talk?" title="Book a call instead." text="Pick a time that suits you and tell us what you would like to cover. We will come prepared." />
 
-  <section class="sec raised" aria-labelledby="suppliers">
-    <div class="wrap supplier">
-      <div><p class="eyebrow">Suppliers &amp; manufacturing</p><h2 id="suppliers">Working with suppliers.</h2></div>
-      <div>
-        <p>Benjaire is exploring relationships with manufacturers and suppliers in China and other international markets, in these categories:</p>
-        <ul class="taglist">{SUPPLIER_AREAS.map((a) => <li>{a}</li>)}</ul>
-        <p class="note">Choose <strong>Supplier / Manufacturing</strong> above and include your company website, product categories and certifications.</p>
-        <div class="actions mt-4"><a class="btn ghost" href="/contact?category=supplier#inquiry">Send a supplier inquiry</a></div>
-      </div>
-    </div>
-  </section>
 </Base>
 
 <script>

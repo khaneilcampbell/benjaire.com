@@ -5,7 +5,6 @@ export const CATEGORIES: Record<string, string> = {
   digital: 'Digital Solutions',
   general: 'General Business Inquiry',
   partnership: 'Partnership',
-  supplier: 'Supplier / Manufacturing',
 };
 
 export const LIMITS = { name: 120, email: 254, company: 160, messageMin: 20, messageMax: 5000 } as const;
@@ -58,7 +57,7 @@ export function validate(form: FormData): { inquiry?: Inquiry; errors: FieldErro
 
 /**
  * Recipient for a category. CATEGORY_RECIPIENTS is optional JSON such as
- * {"supplier":"sourcing@example.com"}; anything unmapped goes to the default.
+ * {"partnership":"partners@example.com"}; anything unmapped goes to the default.
  * Every address must be a verified Email Routing destination.
  */
 export function recipientFor(category: string, fallback: string, mapJson?: string): string {

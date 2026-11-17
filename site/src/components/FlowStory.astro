@@ -1,0 +1,66 @@
+---
+// "One inquiry, start to finish": four beats beside a pinned screen on desktop
+// (flow.ts picks the screen). Without JS, on phones and under reduced motion,
+// each beat shows its own screen inline and nothing pins.
+import StoryScreen from './StoryScreen.astro';
+const BEATS = [
+  { who: '01 · Dana', when: 'Submits the form', title: 'A prospect reaches out', text: 'Dana needs a logo and website before a launch. She fills in the contact form on Northwind’s site.', label: 'northwind.example/contact' },
+  { who: '02 · Flow', when: 'Within seconds', title: 'Sorted, saved and confirmed', text: 'Claude reads the message and tags it. The record is saved and Dana gets a confirmation with her reference and a booking link.', label: 'Flow · intake' },
+  { who: '03 · Owner', when: 'On their phone', title: 'One email with everything', text: 'The owner sees the summary, a drafted reply to edit and three buttons. Replying to the alert goes straight to Dana.', label: 'Inbox · you' },
+  { who: '04 · Client', when: 'After the call', title: 'Won, and onboarded', text: 'One tap on “Became a client” sends Dana the welcome email: what to send over and a link to book the kickoff.', label: 'Inbox · Dana' },
+];
+---
+<div class="story" data-story>
+  <ol class="beats">
+    {BEATS.map((b, i) => (
+      <li class:list={['beat', { on: i === 0 }]} data-beat={i} data-label={b.label}>
+        <p class="mono beat-meta"><span>{b.who}</span><span>{b.when}</span></p>
+        <h3>{b.title}</h3>
+        <p>{b.text}</p>
+        <div class="beat-screen" aria-hidden="true"><StoryScreen i={i} /></div>
+      </li>
+    ))}
+  </ol>
+  <div class="device" aria-hidden="true">
+    <div class="device-frame">
+      <p class="device-bar"><i></i><i></i><i></i><span data-device-label>{BEATS[0].label}</span></p>
+      <div class="device-body">
+        {BEATS.map((_, i) => <div class:list={['screen', { on: i === 0 }]} data-screen={i}><StoryScreen i={i} /></div>)}
+      </div>
+      <p class="progress">{BEATS.map((_, i) => <b class:list={{ on: i === 0 }}></b>)}</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .story { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
+  .beats { list-style: none; display: grid; gap: var(--s-5); }
+  .beat { display: grid; gap: 10px; }
+  .beat-meta { display: flex; justify-content: space-between; gap: 16px; font-size: 11px; }
+  .beat h3 { font-weight: 360; font-size: clamp(26px, 2.6vw, 38px); line-height: 1.05; letter-spacing: -.035em; }
+  .beat > p:not(.mono) { max-width: 44ch; }
+  .beat-screen { margin-top: 8px; max-width: 460px; }
+  .device { display: none; }
+
+  /* Desktop with JS and motion allowed: pin the device, hide the inline screens. */
+  @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+    :global(.js) .story { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 6vw, 96px); }
+    :global(.js) .beats { gap: 0; }
+    :global(.js) .beat { min-height: 62vh; align-content: center; border-top: 1px solid var(--line); }
+    :global(.js) .beat h3 { color: var(--fg-low); transition: color var(--dur-base) var(--ease); }
+    :global(.js) .beat.on { border-top-color: var(--signal); }
+    :global(.js) .beat.on h3 { color: var(--fg); }
+    :global(.js) .beat-screen { display: none; }
+    :global(.js) .device { display: block; }
+  }
+  .device-frame { position: sticky; top: calc(var(--nav-h) + 48px + 6vh); border-radius: var(--radius-lg); background: radial-gradient(90% 80% at 80% 10%, rgba(143, 179, 220, .2), transparent 60%), var(--cocoa); padding: 0 24px 24px; box-shadow: var(--shadow-3); }
+  .device-bar { display: flex; align-items: center; gap: 6px; height: 44px; font: 400 10.5px/1 var(--mono); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--on-cocoa-low); }
+  .device-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--on-cocoa-line); }
+  .device-bar span { margin-left: 10px; }
+  .device-body { display: grid; min-height: 280px; }
+  .screen { grid-area: 1 / 1; opacity: 0; transform: translateY(12px); transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease); }
+  .screen.on { opacity: 1; transform: none; }
+  .progress { display: flex; gap: 6px; margin-top: 20px; }
+  .progress b { flex: 1; height: 2px; border-radius: 2px; background: var(--on-cocoa-line); transition: background var(--dur-base); }
+  .progress b.on { background: var(--ice); }
+</style>

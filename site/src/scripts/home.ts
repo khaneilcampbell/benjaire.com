@@ -1,3 +1,5 @@
+import { signalField } from './signal';
+
 // Homepage interactions. Everything here is enhancement: without this script
 // the page shows all content and nothing moves. Nav behaviour lives in Nav.astro.
 const root = document.documentElement;
@@ -10,23 +12,57 @@ const ready = () => root.classList.add('ready');
 requestAnimationFrame(() => requestAnimationFrame(ready));
 setTimeout(ready, 120); // rAF is paused in background tabs
 
-// Hero depth: the interface layer drifts against the render by a few pixels.
-// The render itself never rotates; it is a flat image, not a 3D scene.
+// Hero: the signal field lands in the owner alert, which glows on arrival and
+// cycles through sample inquiries while the hero is on screen.
 const hero = document.querySelector<HTMLElement>('.hero');
-const ui = document.querySelector<HTMLElement>('.hero-ui');
-if (hero && ui && finePointer && !reduce) {
-  hero.addEventListener('pointermove', (e) => {
-    if (!desktop.matches) return;
-    const r = hero.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    ui.style.setProperty('--px', `${(x * -12).toFixed(1)}px`);
-    ui.style.setProperty('--py', `${(y * -8).toFixed(1)}px`);
-  });
-  hero.addEventListener('pointerleave', () => { ui.style.setProperty('--px', '0px'); ui.style.setProperty('--py', '0px'); });
+const canvas = document.querySelector<HTMLCanvasElement>('[data-signal]');
+const alertEl = document.querySelector<HTMLElement>('[data-alert]');
+if (hero && canvas) {
+  const ping = () => {
+    if (!alertEl) return;
+    alertEl.classList.add('ping');
+    setTimeout(() => alertEl.classList.remove('ping'), 420);
+  };
+  const field = signalField(hero, canvas, alertEl, ping);
+  const body = alertEl?.querySelector<HTMLElement>('[data-alert-body]');
+  if (alertEl && body && !reduce) {
+    // Sample data only: no real people or firms.
+    const SAMPLES: [string, [string, string?][], string][] = [
+      ['[Urgent] New inquiry: Dana Lee, Lee & Co', [['Branding'], ['Urgent', 'urgent'], ['$5,000']], 'Hi Dana, thank you for reaching out. A launch next week is a tight window…'],
+      ['New inquiry: Marcus Ortiz, Ortiz Family Dental', [['Website'], ['This week'], ['$2,500']], 'Hi Marcus, thanks for getting in touch. We can start with a short call about your booking page…'],
+      ['New inquiry: Priya Shah, Harbor Accounting', [['Automation'], ['Normal'], ['$1,200']], 'Hi Priya, thank you for your note. Moving client intake out of email is a great place to start…'],
+    ];
+    const title = body.querySelector('[data-alert-title]');
+    const tags = body.querySelector('[data-alert-tags]');
+    const reply = body.querySelector('[data-alert-reply]');
+    const count = alertEl.querySelector('[data-alert-count]');
+    let i = 0;
+    setInterval(() => {
+      if (!field.running()) return;
+      i = (i + 1) % SAMPLES.length;
+      body.classList.add('out');
+      setTimeout(() => {
+        const [t, tg, q] = SAMPLES[i];
+        if (title) title.textContent = t;
+        if (tags) tags.replaceChildren(...tg.map(([x, c]) => { const li = document.createElement('li'); li.textContent = x; if (c) li.className = c; return li; }));
+        if (reply) reply.textContent = q;
+        if (count) count.textContent = `Sample ${i + 1} of ${SAMPLES.length}`;
+        body.classList.remove('out');
+      }, 320);
+    }, 5200);
+  }
+  if (finePointer && !reduce) {
+    hero.addEventListener('pointermove', (e) => {
+      if (!desktop.matches) return;
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty('--hx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+      hero.style.setProperty('--hy', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+    });
+    hero.addEventListener('pointerleave', () => { hero.style.setProperty('--hx', '0'); hero.style.setProperty('--hy', '0'); });
+  }
 }
 
-// Operating model: the sticky stage crossfades to the camera angle of the step in view.
+// Operating model: the sticky stage crossfades to the visual of the step in view.
 const stage = document.querySelector<HTMLElement>('[data-stage]');
 const stageLabel = document.querySelector<HTMLElement>('[data-stage-label]');
 const steps = [...document.querySelectorAll<HTMLElement>('[data-step]')];
@@ -43,36 +79,6 @@ if (stage && steps.length) {
   steps.forEach((s) => io.observe(s));
 }
 
-// Focus areas: the active index row drives the annotation card.
-const index = document.querySelector<HTMLElement>('[data-index]');
-const fName = document.querySelector<HTMLElement>('[data-focus-name]');
-const fText = document.querySelector<HTMLElement>('[data-focus-text]');
-const fCount = document.querySelector<HTMLElement>('[data-focus-count]');
-if (index) {
-  const rows = [...index.querySelectorAll<HTMLElement>('li')];
-  const activate = (row: HTMLElement) => {
-    rows.forEach((r) => r.classList.toggle('on', r === row));
-    const i = rows.indexOf(row);
-    if (fName) fName.textContent = row.querySelector('h3')?.textContent ?? '';
-    if (fText) fText.textContent = row.querySelector('p')?.textContent ?? '';
-    if (fCount) fCount.textContent = `Category ${String(i + 1).padStart(2, '0')} / ${String(rows.length).padStart(2, '0')}`;
-  };
-  rows.forEach((r) => {
-    r.addEventListener('pointerenter', () => activate(r));
-    r.addEventListener('focus', () => activate(r));
-  });
-}
-const tilt = document.querySelector<HTMLElement>('[data-tilt]');
-const card = tilt?.querySelector<HTMLElement>('.focus-card');
-if (tilt && card && finePointer && !reduce) {
-  tilt.addEventListener('pointermove', (e) => {
-    const r = tilt.getBoundingClientRect();
-    card.style.setProperty('--ry', `${(((e.clientX - r.left) / r.width - 0.5) * 8).toFixed(2)}deg`);
-    card.style.setProperty('--rx', `${(((e.clientY - r.top) / r.height - 0.5) * -6).toFixed(2)}deg`);
-  });
-  tilt.addEventListener('pointerleave', () => { card.style.setProperty('--ry', '0deg'); card.style.setProperty('--rx', '0deg'); });
-}
-
 // Section rail: marks the section in view; turns light over the dark band.
 const rail = document.querySelector<HTMLElement>('.rail');
 if (rail) {
@@ -82,7 +88,7 @@ if (rail) {
       if (!en.isIntersecting) continue;
       const id = (en.target as HTMLElement).dataset.section;
       marks.forEach((m, k) => m.classList.toggle('on', k === id));
-      rail.classList.toggle('on-dark', id === 'partner');
+      rail.classList.toggle('on-dark', id === 'partner' || id === 'hero');
     }
   }, { rootMargin: '-50% 0px -50% 0px' });
   document.querySelectorAll('[data-section]').forEach((s) => io.observe(s));

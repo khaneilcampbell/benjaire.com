@@ -7,13 +7,16 @@ export const SITE = {
   // Canonical company description: homepage lead and Organization schema.
   // Reuse it word for word on company profiles; don't paraphrase per page.
   description:
-    'Benjaire is a New York company developing consumer brands and digital solutions that combine technology, design, and business innovation. It operates two business pillars, Digital Solutions and Consumer Brands, under one identity.',
+    'Benjaire is a New York company that builds workflow automation and digital systems for service firms. Its first product is Benjaire Flow, the inquiry system that makes sure every inquiry is answered on time.',
   // Default meta description (120 to 160 characters).
   metaDescription:
-    'Benjaire is a New York company developing consumer brands and digital solutions that combine technology, design, and business innovation.',
+    'Benjaire is a New York company that builds workflow automation and digital systems for service firms, starting with Benjaire Flow.',
   // Short boilerplate for footers, social bios and directories.
   boilerplate:
-    'Benjaire develops digital solutions and consumer brands that combine technology, design and business innovation. Based in New York.',
+    'Benjaire builds workflow automation and digital systems for service firms. Based in New York.',
+  // Company slogan: title tag, share card, Organization schema and home hero.
+  // The hero splits it at the full stop. Keep scripts/build-og.mjs in sync.
+  slogan: ['Building brands.', 'Powering businesses.'],
   url: 'https://benjaire.com',
   email: 'contact@benjaire.com',
   location: 'New York, NY',
@@ -22,7 +25,7 @@ export const SITE = {
 
 export const NAV = [
   { href: '/digital', label: 'Digital Solutions' },
-  { href: '/brands', label: 'Brands' },
+  { href: '/digital/flow', label: 'Flow' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ] as const;
@@ -33,17 +36,6 @@ export const CATEGORIES = [
   { value: 'digital', label: 'Digital Solutions' },
   { value: 'general', label: 'General Business Inquiry' },
   { value: 'partnership', label: 'Partnership' },
-  { value: 'supplier', label: 'Supplier / Manufacturing' },
-] as const;
-
-// Supplier areas of interest (PRD §3.5). "Exploring" language only:
-// no MOQs, partner names or capability claims.
-export const SUPPLIER_AREAS = [
-  'Consumer technology accessories',
-  'Smartphone accessories',
-  'Laptop accessories',
-  'Audio device accessories',
-  'Lifestyle products',
 ] as const;
 
 // Cloudflare Turnstile site key (public by design). The secret key lives

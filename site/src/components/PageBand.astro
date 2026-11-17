@@ -1,21 +1,55 @@
 ---
-// Wide Pavilion render at the foot of an inner page header. Every page uses a
-// different camera angle of the same structure as the homepage hero, so the
-// site reads as one place. Images live in src/assets/pages/.
+// The wide band at the foot of an inner page header. Two kinds:
+// - an image band (pass src), for a page that needs a photo or render;
+// - a signal band (no src): code-drawn lines on night that converge on one
+//   ice-blue point, the same motif as the homepage hero. Decorative.
 import type { ImageMetadata } from 'astro';
 import { Picture } from 'astro:assets';
 
-interface Props { src: ImageMetadata; alt: string; focus?: 'center' | 'right' }
-const { src, alt, focus = 'center' } = Astro.props;
+interface Props { src?: ImageMetadata; alt?: string; focus?: 'center' | 'right'; label?: string }
+const { src, alt = '', focus = 'center', label } = Astro.props;
+// Deterministic line set: each starts at the left edge and lands on the node.
+const lines = Array.from({ length: 16 }, (_, i) => {
+  const y = 30 + i * 24 + ((i * 37) % 11);
+  const c1 = 300 + ((i * 53) % 200);
+  return `M-20 ${y} C ${c1} ${y + ((i % 2) ? 40 : -40)}, ${640 + ((i * 29) % 120)} 210, 880 210`;
+});
 ---
-<figure class="page-band" data-focus={focus}>
-  <Picture src={src} formats={['avif', 'webp']} widths={[800, 1400, 2000]} sizes="(min-width: 1320px) 1208px, 92vw" alt={alt} fetchpriority="high" loading="eager" />
-</figure>
+{src ? (
+  <figure class="page-band" data-focus={focus}>
+    <Picture src={src} formats={['avif', 'webp']} widths={[800, 1400, 2000]} sizes="(min-width: 1320px) 1208px, 92vw" alt={alt} fetchpriority="high" loading="eager" />
+  </figure>
+) : (
+  <figure class="page-band signal" aria-hidden="true">
+    <svg viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <defs>
+        <linearGradient id="pb-g" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stop-color="#e8edf3" stop-opacity=".06" />
+          <stop offset=".6" stop-color="#e8edf3" stop-opacity=".22" />
+          <stop offset="1" stop-color="#8fb3dc" stop-opacity=".9" />
+        </linearGradient>
+        <radialGradient id="pb-glow"><stop offset="0" stop-color="#8fb3dc" stop-opacity=".35" /><stop offset="1" stop-color="#8fb3dc" stop-opacity="0" /></radialGradient>
+      </defs>
+      <circle cx="880" cy="210" r="220" fill="url(#pb-glow)" />
+      <g fill="none" stroke="url(#pb-g)" stroke-width="1">{lines.map((d) => <path d={d} />)}</g>
+      <circle class="pb-ring" cx="880" cy="210" r="16" fill="none" stroke="#8fb3dc" stroke-opacity=".6" />
+      <circle cx="880" cy="210" r="5" fill="#8fb3dc" />
+      <path d="M880 210H1220" stroke="#8fb3dc" stroke-opacity=".5" />
+    </svg>
+    {label && <figcaption class="mono">{label}</figcaption>}
+  </figure>
+)}
 
 <style>
-  .page-band { margin: clamp(48px, 6vw, 80px) 0 0; aspect-ratio: 21 / 9; border-radius: 4px; overflow: hidden; background: var(--surface); max-width: 100%; }
+  .page-band { position: relative; margin: clamp(48px, 6vw, 80px) 0 0; aspect-ratio: 21 / 9; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface); max-width: 100%; }
   .page-band :global(picture), .page-band :global(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* No inline styles (strict CSP): the crop focus is a data attribute. */
   .page-band[data-focus='right'] :global(img) { object-position: 68% 50%; }
-  @media (max-width: 700px) { .page-band { aspect-ratio: 4 / 3; } }
+  .page-band.signal { background: radial-gradient(rgba(232, 237, 243, .1) 1px, transparent 1.2px) 0 0 / 24px 24px, var(--cocoa); border-radius: var(--radius-lg); aspect-ratio: 3 / 1; }
+  .page-band.signal svg { display: block; width: 100%; height: 100%; }
+  .page-band.signal figcaption { position: absolute; left: 24px; bottom: 20px; font-size: 11px; color: var(--on-cocoa-low); }
+  .pb-ring { transform-origin: 880px 210px; }
+  @media (prefers-reduced-motion: no-preference) { .pb-ring { animation: pb-ping 3.2s var(--ease) infinite; } }
+  @keyframes pb-ping { 0% { transform: scale(.6); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+  @media (max-width: 700px) { .page-band { aspect-ratio: 4 / 3; } .page-band.signal { aspect-ratio: 16 / 9; } }
 </style>

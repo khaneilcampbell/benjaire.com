@@ -1,4 +1,59 @@
-# Benjaire Design System (v0.3, "The Pavilion")
+# Benjaire Design System (v0.4, "Silver Blue")
+
+- **Status:** Palette chosen by the owner 2026-11-07; in review on this branch, not yet live. Benjaire is Digital Solutions only from 2026-11-07 (Consumer Brands retired), slogan kept as "Building brands. Powering businesses." (owner decision 2026-11-09) Supersedes v0.3 "The Pavilion" and the v1 product layer, which are kept below for history.
+- **Direction:** Benjaire reads as a digital solutions company. Benjaire and Benjaire Flow share every token and component; Flow is set apart only by its product UI. Visuals are code-built: live product UI, a canvas "signal field" (lines that converge and land in a Flow owner alert), outcome cards and a four-stop "how it works" path. No stock or generated photos, robots, glowing brains, circuit boards or invented metrics.
+- **Palette picker:** https://claude.ai/artifact/LK26bYHW3rZ68QZgCBp9sY · **Direction preview:** https://claude.ai/artifact/1KbaRypQ5SWvR5c2mhdHJR
+
+## Tokens (`site/src/styles/global.css`)
+Older token names are kept so components did not need renaming: `--cocoa` is now night, `--silver-ink` is a muted steel blue.
+
+| Role | Token | Value | Use | Contrast |
+|---|---|---|---|---|
+| Ground | `--bg` | `#f4f6f8` | Page background (cool white) | |
+| Band | `--bg-raised` | `#e6ebf0` | Alternating sections | |
+| Surface | `--surface` | `#dde3ea` | Image wells, chip fills | |
+| Panel | `--paper` | `#ffffff` | Cards, panels, product UI | |
+| Ink | `--fg`, `--accent` | `#0b0d10` | Headings, primary buttons | 18:1 on ground |
+| Body | `--fg-mid` | `#3d4651` | Body text | 8.8:1 |
+| Labels | `--fg-low` | `#566170` | Labels, meta | 5.8:1 on ground, 5.2:1 on band |
+| Steel | `--fg-faint` | `#7f8b99` | Icons, arrows, decoration only | 3.2:1 |
+| Silver | `--silver` | `#c3ccd6` | Hairlines, decoration only | |
+| Display accent | `--silver-ink` | `#456b96` | Second line of display headings | 5.1:1 |
+| Blue | `--signal` | `#2e5a8c` | Links, focus rings, the one live highlight per view | 6.6:1; white on it 7.1:1 |
+| Blue deep | `--signal-hi` | `#244a75` | Hover, text on tint | 7.9:1 on tint |
+| Blue tint | `--signal-tint` | `#eaf0f7` | Selected chips, info panels | |
+| Night | `--cocoa` | `#0b0d10` | Home hero, closing bands, code-drawn panels | |
+| Night raised | `--cocoa-2` | `#12161c` | Raised surfaces on night | |
+| On night | `--on-cocoa` | `#e8edf3` | Text on night | 16.5:1 |
+| On night low | `--on-cocoa-low` | `#9aa7b6` | Secondary text on night | 7.4:1 on night-2 |
+| Ice | `--ice` | `#8fb3dc` | Signal lines, accents and focus on night | 8.9:1 on night |
+| Metal | `--metal` | gradient `#e8edf3 → #9fb1c6 → #5b7ea6` | Display highlight on night; never behind text | |
+| Status | `--won`, `--waiting`, `--danger` | `#1d6b48`, `#8a5a12`, `#a3271a` | Always with a word | |
+
+**Shape and depth:** `--radius-sm 8px`, `--radius-md 14px`, `--radius-lg 20px`, `--radius-pill 999px`; `--shadow-1` to `--shadow-3`, cool-tinted. **Motion:** `--dur-fast 150ms`, `--dur-base 300ms`, `--dur-slow 700ms`, easing `--ease`. No raw hex in components; the only exceptions are SVG stops in code-drawn art and the share-card script.
+
+## Type
+Archivo (width 112%, light) for display, Inter for UI and body, IBM Plex Mono uppercase for labels and data. One heading scale for Benjaire and Flow. Body at least 16px, at most about 70ch. Prices, times and counts use `tabular-nums`. Section labels are `<p class="eyebrow">`; the second line of a display heading is a `<span>` in `--silver-ink` (or `--metal` on night).
+
+## Components
+Buttons (primary ink, ghost outline, text link; 44px targets), chips and badges, cards, one glass panel per view (on `.night` panels, cards are solid white instead of frosted), section head (eyebrow, title, lead), stats, nav and footer identical on every page, FAQ accordion, price cards.
+
+- **Product architecture:** Flow pages add `FlowSubnav.astro`, a sticky sub-nav with the "Benjaire **Flow**" lockup (the B plus the word in Archivo, never a separate logo).
+- **Code-built visuals:** `OwnerAlert.astro` (sample owner alert), `ModelVisual.astro` (Build, Operate, Grow), `FlowHero.astro` (layered form, alert and phone), `FlowStory.astro` + `StoryScreen.astro` (one inquiry in four beats), `FlowPath.astro` (four-stop path; architecture image and an HTML trigger table behind "Technical detail"), `FlowOutcomes.astro` (reply ring, pipeline, Monday digest), `PageBand.astro` signal variant.
+- **Sample data:** every sample name, number and inquiry is labelled "Sample" on screen.
+
+## Imagery
+No photographic renders remain: the Pavilion images were retired with Consumer Brands (2026-11-07), and About uses the signal band. Flow keeps `05-whats-included.png`, `06-setup-process.png` and, inside Technical detail, `02-workflow-architecture.png`. Share cards: `node scripts/build-og.mjs` writes `public/og/benjaire-og.png` and `flow-og.png`.
+
+## Motion
+- Home hero: `src/scripts/signal.ts` draws 18 lines on a canvas that converge, turn ice blue and land in the owner alert, which glows on arrival and cycles three samples. DPR capped at 2; pauses off screen and in hidden tabs.
+- Flow: pointer depth on the hero layers, a pinned story on desktop, a path that fills on scroll, outcome cards that settle once (`src/scripts/flow.ts`).
+- Animate only `transform` and `opacity`. Every animation has a complete still frame; under `prefers-reduced-motion: reduce` nothing pins, loops or sweeps. Pages are complete without JS.
+- Budget: no runtime dependencies, no WebGL or video.
+
+---
+
+# Benjaire Design System (v0.3, "The Pavilion", superseded 2026-11)
 
 - **Status:** Approved by owner 2026-10-14 and live. Supersedes v0.2 (cream, cocoa, bronze), which is kept below for history.
 - **Direction:** architectural futurism, after the Kontra reference. An original abstract structure, three white shells on one base over still water, is Benjaire's recurring visual signature: canopy = Build, ribbed arch = Operate, ribbon = Grow.

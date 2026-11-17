@@ -11,13 +11,14 @@
 // Installed books a fit call until its link is set, then sells straight through.
 import Base from '../../layouts/Base.astro';
 import { Picture } from 'astro:assets';
-import heroImg from '../../assets/flow/10-site-hero.png';
-import archImg from '../../assets/flow/02-workflow-architecture.png';
-import autoImg from '../../assets/flow/03-automation-interface.png';
-import caseImg from '../../assets/flow/04-business-use-case.png';
 import kitImg from '../../assets/flow/05-whats-included.png';
 import setupImg from '../../assets/flow/06-setup-process.png';
 import FlowDemo from '../../components/FlowDemo.astro';
+import FlowSubnav from '../../components/FlowSubnav.astro';
+import FlowHero from '../../components/FlowHero.astro';
+import FlowStory from '../../components/FlowStory.astro';
+import FlowPath from '../../components/FlowPath.astro';
+import FlowOutcomes from '../../components/FlowOutcomes.astro';
 import Booking from '../../components/Booking.astro';
 import { SITE, FLOW_CHECKOUT } from '../../site';
 
@@ -106,7 +107,9 @@ const pad = (n: number) => String(n).padStart(2, '0');
 <Base title="Flow" shareTitle="Benjaire Flow | The Inquiry System for Service Firms" description={description} ogImage="/og/flow-og.png" ogImageAlt="Benjaire Flow, the inquiry system for service firms. Every inquiry, answered on time. From $79, one time.">
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(productLd)} />
 
-  <section class="page-head product-head">
+  <FlowSubnav />
+
+  <section class="page-head product-head" id="overview">
     <div class="wrap">
       <p class="eyebrow"><a href="/digital">Digital Solutions</a> · Benjaire Flow</p>
       <span class="badge product-badge">Available now · v1.0</span>
@@ -117,7 +120,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
         <a class="btn ghost" href="#try">Try the alert</a>
       </div>
       <figure class="shot hero-shot">
-        <Picture src={heroImg} formats={['avif', 'webp']} widths={[800, 1400, 2000]} sizes="(min-width: 1320px) 1208px, 92vw" alt="Flow’s owner alert email with a summary, a suggested reply and three status buttons, beside a phone showing the sender’s confirmation" fetchpriority="high" loading="eager" />
+        <FlowHero />
         <figcaption class="mono">Illustrative mockup with sample data. Flow sends these emails from your own domain.</figcaption>
       </figure>
     </div>
@@ -151,7 +154,17 @@ const pad = (n: number) => String(n).padStart(2, '0');
     </div>
   </section>
 
-  <section class="sec raised band-section" id="features" aria-labelledby="features-title">
+  <section class="sec raised band-section" id="story" aria-labelledby="story-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">One inquiry, start to finish</p><h2 id="story-title">From form to <span>new client.</span></h2></div>
+        <p class="muted">Dana writes in through the website. Here is what happens next, with no one copying anything between apps. Example with Northwind Studio, a fictional design agency, and sample data; timing depends on your n8n and email provider.</p>
+      </div>
+      <FlowStory />
+    </div>
+  </section>
+
+  <section class="sec band-section" id="features" aria-labelledby="features-title">
     <div class="wrap">
       <div class="sec-head">
         <div><p class="eyebrow">Features in v1.0</p><h2 id="features-title">What it actually does.</h2></div>
@@ -163,25 +176,23 @@ const pad = (n: number) => String(n).padStart(2, '0');
     </div>
   </section>
 
-  <section class="sec band-section" aria-labelledby="how">
+  <section class="sec raised band-section" aria-labelledby="how">
     <div class="wrap">
       <div class="sec-head">
         <div><p class="eyebrow">How it works</p><h2 id="how">Your form, your n8n, <span>your domain.</span></h2></div>
         <p class="muted">Your form posts to Flow through the included Cloudflare Worker. Flow sorts the inquiry with Claude, keeps the record in your n8n and sends every email through Resend from your address.</p>
       </div>
-      <figure class="shot">
-        <Picture src={archImg} formats={['avif', 'webp']} widths={[800, 1400, 2000]} sizes="(min-width: 1320px) 1208px, 92vw" alt="Architecture: contact form, Cloudflare Worker, six n8n workflows with three data tables, Claude, Resend and inboxes, with a fallback email path" />
-      </figure>
-      <div class="shots">
-        <figure class="shot">
-          <Picture src={autoImg} formats={['avif', 'webp']} widths={[800, 1200]} sizes="(min-width: 900px) 46vw, 92vw" alt="Table of every trigger Flow listens for and the actions it takes" />
-          <figcaption class="mono">Every trigger and what follows</figcaption>
-        </figure>
-        <figure class="shot">
-          <Picture src={caseImg} formats={['avif', 'webp']} widths={[800, 1200]} sizes="(min-width: 900px) 46vw, 92vw" alt="Four step example of a design studio receiving and winning an inquiry" />
-          <figcaption class="mono">Example with a fictional studio</figcaption>
-        </figure>
+      <FlowPath />
+    </div>
+  </section>
+
+  <section class="sec band-section" id="outcomes" aria-labelledby="outcomes-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">What changes</p><h2 id="outcomes-title">Nothing slips <span>through.</span></h2></div>
+        <p class="muted">What an owner sees once Flow is running. These cards show sample data, not results from real customers.</p>
       </div>
+      <FlowOutcomes />
     </div>
   </section>
 
@@ -274,15 +285,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .eyebrow a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--line-mid); }
   .eyebrow a:hover { border-bottom-color: var(--fg); }
   .shot { margin: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-  .shot :global(picture), .shot :global(img) { display: block; width: 100%; height: auto; border-radius: 4px; background: var(--surface); }
+  .shot :global(picture), .shot :global(img) { display: block; width: 100%; height: auto; border-radius: var(--radius-sm); background: var(--surface); }
   .shot figcaption { font-size: 11px; }
   .hero-shot { margin-top: clamp(48px, 6vw, 80px); }
-  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); margin-top: var(--s-4); }
   .row .mono { font-size: 11px; margin-bottom: 6px; }
 
   .tiers { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-3); }
-  .tier { background: var(--paper); border: 1px solid var(--line); border-radius: 24px; padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
-  .tier.pick { border-color: var(--fg); box-shadow: 0 30px 60px -40px rgba(18, 19, 21, .45); }
+  .tier { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+  .tier.pick { border-color: var(--fg); box-shadow: var(--shadow-2); }
   .tier .badge { align-self: flex-start; margin-bottom: 0; }
   .tier h3 { margin-top: var(--s-1); }
   .price { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
@@ -300,17 +310,19 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .faq details[open] summary::after { content: "−"; }
   .faq details p { padding-bottom: 22px; max-width: 60ch; }
 
-  /* product layer (B on A): denser product type, one signal accent */
-  .product-head h1 { font-stretch: 100%; font-weight: 500; letter-spacing: -.035em; }
+  /* product layer: one signal accent per view; type matches the company pages */
   .product-badge { background: var(--signal-tint); color: var(--signal-hi); border-color: transparent; }
   .try { background: var(--canvas); border-block: 1px solid var(--line); }
   .try-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
-  .try-copy h2 { font-stretch: 100%; font-weight: 500; letter-spacing: -.035em; margin-bottom: var(--s-2); }
+  .try-copy h2 { margin-bottom: var(--s-2); }
   .try-steps { list-style: none; counter-reset: s; display: grid; gap: 12px; margin-top: var(--s-4); font-size: 12px; text-transform: uppercase; letter-spacing: var(--track-label); color: var(--fg); }
   .try-steps li { counter-increment: s; display: flex; align-items: center; gap: 12px; }
   .try-steps li::before { content: counter(s); width: 28px; height: 28px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--accent); color: var(--on-accent); flex: none; }
   @media (max-width: 900px) { .try-grid { grid-template-columns: minmax(0, 1fr); } }
 
   @media (max-width: 1000px) { .tiers { grid-template-columns: minmax(0, 1fr); } }
-  @media (max-width: 900px) { .shots { grid-template-columns: minmax(0, 1fr); } }
 </style>
+
+<script>
+  import '../../scripts/flow';
+</script>

@@ -15,7 +15,7 @@ export function initContactForm(): void {
   const status = document.getElementById('form-status') as HTMLElement;
 
   const params = new URLSearchParams(location.search);
-  // ?category=supplier preselects a chip.
+  // ?category=partnership preselects a chip; an unknown value keeps the default.
   const wanted = params.get('category');
   if (wanted) {
     const chip = form.querySelector<HTMLInputElement>(`input[name="category"][value="${CSS.escape(wanted)}"]`);

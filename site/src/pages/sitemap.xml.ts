@@ -3,7 +3,7 @@ import { SITE } from '../site';
 
 // Public, indexable pages only. Legal pages join once counsel has reviewed
 // them (they carry noindex until then; see PRD V-10).
-const PATHS = ['/', '/digital', '/digital/flow', '/about', '/brands', '/contact'];
+const PATHS = ['/', '/digital', '/digital/flow', '/about', '/contact'];
 
 export const GET: APIRoute = () => {
   const urls = PATHS.map((p) => `  <url><loc>${new URL(p, SITE.url).href}</loc></url>`).join('\n');

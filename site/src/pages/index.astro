@@ -1,110 +1,65 @@
 ---
-// Homepage, design v0.3 "The Pavilion" (approved 2026-10-14). Digital first
-// positioning (2026-10-14): one company, two pillars (Digital Solutions and
-// Consumer Brands). Digital Solutions leads; no separate division branding.
+// Homepage, design v0.4 "Silver Blue". Benjaire is one business, Digital
+// Solutions (Consumer Brands retired 2026-11); its first product is Flow.
 // Layout styles: src/styles/home.css. Interactions: src/scripts/home.ts.
-import { getCollection } from 'astro:content';
-import { getImage, Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import BrandGrid from '../components/BrandGrid.astro';
+import OwnerAlert from '../components/OwnerAlert.astro';
+import ModelVisual from '../components/ModelVisual.astro';
 import { SITE, CATEGORIES, FLOW_CHECKOUT } from '../site';
 import '../styles/home.css';
-import pavilion from '../assets/home/pavilion.jpg';
-import pavilionPortrait from '../assets/home/pavilion-portrait.jpg';
-import buildImg from '../assets/home/build.jpg';
-import operateImg from '../assets/home/operate.jpg';
-import growImg from '../assets/home/grow.jpg';
-import reflection from '../assets/home/reflection.jpg';
-
-// Art-directed hero: a wide render for desktop, a portrait crop for phones.
-const wide = { src: pavilion, widths: [1200, 1800, 2400] };
-const tall = { src: pavilionPortrait, widths: [480, 720, 864] };
-const [wideAvif, wideWebp, tallAvif, tallWebp, fallback] = await Promise.all([
-  getImage({ ...wide, format: 'avif', quality: 60 }),
-  getImage({ ...wide, format: 'webp', quality: 72 }),
-  getImage({ ...tall, format: 'avif', quality: 60 }),
-  getImage({ ...tall, format: 'webp', quality: 72 }),
-  getImage({ src: pavilion, width: 1800, format: 'jpg', quality: 76 }),
-]);
 
 // Build → Operate → Grow is a real sequence, so it is numbered.
 const STEPS = [
-  { id: 'build', name: 'Build', role: 'Solutions and brands', img: buildImg, form: 'The canopy',
-    text: 'We develop technology solutions for businesses and consumer brands, from research and design to launch.',
-    spec: ['Research', 'Design', 'Product', 'Launch'] },
-  { id: 'operate', name: 'Operate', role: 'Systems and delivery', img: operateImg, form: 'The arch',
-    text: 'We run lean, repeatable systems to deliver services and manage operations, from client projects to sourcing and partnerships.',
-    spec: ['Service delivery', 'Operations', 'Sourcing', 'Automation'] },
-  { id: 'grow', name: 'Grow', role: 'Validation and expansion', img: growImg, form: 'The ribbon',
-    text: 'We validate demand before investing, strengthen what works and expand into new services, markets and product categories.',
-    spec: ['Validation', 'Ongoing support', 'New categories'] },
+  { id: 'build', name: 'Build', role: 'Systems around your work', form: 'From brief to launch',
+    text: 'We design and build automation around how your business already runs, from the first conversation to launch.',
+    spec: ['Discovery', 'Workflow design', 'Build', 'Launch'] },
+  { id: 'operate', name: 'Operate', role: 'Systems that run daily', form: 'Every working day',
+    text: 'We keep each system running with monitoring, fixes and the small changes that keep it useful as your business changes.',
+    spec: ['Monitoring', 'Support', 'Updates', 'Automation'] },
+  { id: 'grow', name: 'Grow', role: 'Proof before scale', form: 'One workflow at a time',
+    text: 'We check what each system saves, strengthen what works and add the next workflow only once the first has earned it.',
+    spec: ['Review', 'Improve', 'Next workflow'] },
 ];
 
 // Benjaire Flow v1.0, the first Digital Solutions product (see /digital/flow).
 // Only list what v1.0 actually does.
 const FLOW = ['Inquiry capture', 'Sorted by Claude', 'One tap status', 'Reply reminders', 'Monday digest'];
 
-const FOCUS = [
-  { name: 'Consumer technology', text: 'Accessories and devices that fit seamlessly into everyday life.' },
-  { name: 'Digital', text: 'Online products and experiences designed for how people live and work today.' },
-  { name: 'Lifestyle', text: 'Products and brands that bring modern design to the everyday.' },
-];
-
-const hasBrands = (await getCollection('brands')).some((e) => e.data.featured);
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 <Base hero>
-  <link slot="head" rel="preload" as="image" type="image/avif" imagesrcset={wideAvif.srcSet.attribute} imagesizes="100vw" media="(min-width: 900px)" />
-
   <ol class="rail" aria-hidden="true">
-    {['hero', 'digital', 'philosophy', 'model', 'focus', 'portfolio', 'partner'].map((s, i) => <li data-rail={s} class={i === 0 ? 'on' : undefined}></li>)}
+    {['hero', 'digital', 'philosophy', 'model', 'partner'].map((s, i) => <li data-rail={s} class={i === 0 ? 'on' : undefined}></li>)}
   </ol>
 
-  <!-- 1 · Hero -->
+  <!-- 1 · Hero: inquiries (lines of light) are sorted and land in one owner alert -->
   <section class="hero" id="hero" data-section="hero" aria-labelledby="hero-title">
-    <div class="hero-scene">
-      <picture>
-        <source media="(max-width: 899px)" type="image/avif" srcset={tallAvif.srcSet.attribute} sizes="100vw" />
-        <source media="(max-width: 899px)" type="image/webp" srcset={tallWebp.srcSet.attribute} sizes="100vw" />
-        <source type="image/avif" srcset={wideAvif.srcSet.attribute} sizes="100vw" />
-        <source type="image/webp" srcset={wideWebp.srcSet.attribute} sizes="100vw" />
-        <img src={fallback.src} width="2752" height="1536" alt="An abstract white pavilion of three curved shells, a low canopy, a ribbed arch and a reaching ribbon, rising from still water on one shared base" fetchpriority="high" loading="eager" decoding="async" />
-      </picture>
-    </div>
-
-    <div class="hero-ui">
+    <canvas class="hero-signal" data-signal aria-hidden="true"></canvas>
+    <div class="hero-pane" aria-hidden="true"></div>
+    <div class="wrap hero-ui">
       <div class="hero-copy">
-        <p class="mono reveal">Benjaire · New York · Est. {SITE.founded}</p>
-        <h1 id="hero-title" class="reveal">Building brands. <span>Powering businesses.</span></h1>
-        <p class="lead hero-lead reveal">{SITE.metaDescription}</p>
+        <p class="eyebrow reveal">Digital Solutions · New York · Est. {SITE.founded}</p>
+        <h1 id="hero-title" class="reveal">{SITE.slogan[0]} <span>{SITE.slogan[1]}</span></h1>
+        <p class="lead hero-lead reveal">Benjaire builds workflow automation for service firms. Our first product, Benjaire Flow, sorts every website inquiry with Claude and hands you one email you can act on with a tap.</p>
         <div class="actions reveal">
           <a class="btn primary" href="/digital/flow">Meet Benjaire Flow <span aria-hidden="true">→</span></a>
           <a class="btn ghost" href="/digital">Explore Digital Solutions</a>
         </div>
+        <dl class="hero-proof reveal">
+          <div><dt>Ready-made workflows</dt><dd>6</dd></div>
+          <div><dt>Typical first setup</dt><dd>45–90 min</dd></div>
+          <div><dt>One time, from</dt><dd>$79</dd></div>
+        </dl>
       </div>
-
-      <nav class="pins" aria-label="The operating model">
-        {STEPS.map((s) => (
-          <a class={`pin pin-${s.id}`} href={`#${s.id}`}>
-            <span class="dot" aria-hidden="true"></span>
-            <span class="pin-label"><b>{s.name}</b><em>{s.role}</em></span>
-          </a>
-        ))}
-      </nav>
-
-      <aside class="glass hero-card" aria-label="Featured solution">
-        <p class="mono">New · Benjaire Flow v1.0</p>
-        <p>The inquiry system for service firms. Your website contact form becomes a managed inquiry pipeline in your own n8n.</p>
-        <a class="btn primary" href="/digital/flow#pricing">See pricing · from $79 <span aria-hidden="true">→</span></a>
-      </aside>
+      <OwnerAlert class="hero-alert" />
     </div>
-    <span class="scroll-cue mono" aria-hidden="true">Scroll</span>
+    <p class="wrap hero-legend" aria-hidden="true"><span><i></i>Inquiries arriving</span><span><i class="sorted"></i>Sorted by Flow</span></p>
   </section>
 
   <!-- 2 · Digital Solutions -->
   <section class="sec digital" id="digital" data-section="digital" aria-labelledby="digital-title">
     <div class="wrap grid-2">
-      <p class="mono">Digital Solutions</p>
+      <p class="eyebrow">Digital Solutions</p>
       <div>
         <h2 id="digital-title">Smarter systems. <span>Better business.</span></h2>
         <div class="philo-foot">
@@ -114,8 +69,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       </div>
     </div>
     <div class="wrap">
-      <div class="plinth">
-        <Picture src={operateImg} formats={['avif', 'webp']} widths={[900, 1600]} sizes="100vw" alt="" loading="lazy" />
+      <div class="plinth night">
         <div class="glass plinth-card">
           <span class="badge">Available now</span>
           <p class="mono">Benjaire Flow · From $79</p>
@@ -134,19 +88,19 @@ const pad = (n: number) => String(n).padStart(2, '0');
   <!-- 3 · Philosophy -->
   <section class="sec philosophy" id="philosophy" data-section="philosophy" aria-labelledby="philosophy-title">
     <div class="wrap grid-2">
-      <p class="mono">What we do</p>
+      <p class="eyebrow">What we do</p>
       <div>
         <h2 id="philosophy-title" class="h-statement">
-          {'One company. Two pillars, built on one shared foundation.'.split(' ').map((w) => <span>{w} </span>)}
+          {'One focus: systems that give service firms their time back.'.split(' ').map((w) => <span>{w} </span>)}
         </h2>
         <div class="philo-foot">
-          <p>Benjaire develops digital solutions for businesses and consumer brands for everyday life. Both share the same standards, systems and name, and we validate demand before we expand.</p>
+          <p>Benjaire builds digital systems for service firms: inquiry handling, client intake and the everyday admin that slows a small team down. We start with one workflow, prove it works, then build the next.</p>
           <a class="link" href="/about">How Benjaire works <span aria-hidden="true">→</span></a>
         </div>
         <dl class="h-facts">
           <div><dt class="mono">Founded</dt><dd>{SITE.founded}</dd></div>
           <div><dt class="mono">Based in</dt><dd>New York</dd></div>
-          <div><dt class="mono">Pillars</dt><dd>Two</dd></div>
+          <div><dt class="mono">First product</dt><dd>Flow</dd></div>
         </dl>
       </div>
     </div>
@@ -156,14 +110,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
   <section class="sec model" id="model" data-section="model" aria-labelledby="model-title">
     <div class="wrap">
       <div class="h-head">
-        <p class="mono">Operating model</p>
+        <p class="eyebrow">Operating model</p>
         <h2 id="model-title">Build. Operate. <span>Grow.</span></h2>
       </div>
       <div class="model-grid">
         <ol class="steps">
           {STEPS.map((s, i) => (
             <li class="step" id={s.id} data-step={i}>
-              <Picture class="step-img" src={s.img} formats={['avif', 'webp']} widths={[420, 840]} sizes="100vw" alt="" loading="lazy" />
+              <ModelVisual class="step-img" kind={s.id as 'build' | 'operate' | 'grow'} />
               <p class="mono">{pad(i + 1)} · {s.form}</p>
               <h3>{s.name}</h3>
               <p class="role">{s.role}</p>
@@ -173,9 +127,9 @@ const pad = (n: number) => String(n).padStart(2, '0');
           ))}
         </ol>
         <div class="stage" aria-hidden="true">
-          <div class="stage-frame" data-stage data-active="0">
+          <div class="stage-frame night" data-stage data-active="0">
             {STEPS.map((s, i) => (
-              <Picture class="stage-img" data-i={i} src={s.img} formats={['avif', 'webp']} widths={[560, 840]} sizes="(min-width: 900px) 42vw, 100vw" alt="" loading="lazy" />
+              <ModelVisual class="stage-img" i={i} kind={s.id as 'build' | 'operate' | 'grow'} />
             ))}
             <div class="stage-tag glass"><span class="mono" data-stage-label>01 · Build</span></div>
           </div>
@@ -184,65 +138,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
     </div>
   </section>
 
-  <!-- 5 · Focus areas -->
-  <section class="sec focus" id="focus" data-section="focus" aria-labelledby="focus-title">
-    <div class="wrap">
-      <div class="h-head">
-        <p class="mono">Focus areas</p>
-        <h2 id="focus-title">Consumer technology, digital <span>and lifestyle.</span></h2>
-      </div>
-      <div class="focus-grid">
-        <ul class="index" data-index>
-          {FOCUS.map((f, i) => (
-            <li class={i === 0 ? 'on' : undefined} data-i={i} tabindex="0">
-              <span class="mono">{pad(i + 1)}</span>
-              <h3>{f.name}</h3>
-              <p>{f.text}</p>
-            </li>
-          ))}
-        </ul>
-        <div class="focus-visual" aria-hidden="true" data-tilt>
-          <Picture src={pavilion} formats={['avif', 'webp']} widths={[700, 1200]} sizes="(min-width: 900px) 50vw, 100vw" alt="" loading="lazy" />
-          <div class="glass focus-card">
-            <span class="mono" data-focus-count>Category 01 / 03</span>
-            <b data-focus-name>{FOCUS[0].name}</b>
-            <span data-focus-text>{FOCUS[0].text}</span>
-          </div>
-        </div>
-      </div>
-      <p class="muted center-note">Three categories, one standard: modern products, considered design and great experiences. <a href="/brands">Explore the Benjaire portfolio</a></p>
-    </div>
-  </section>
-
-  <!-- 6 · Portfolio -->
-  <section class="sec portfolio" id="portfolio" data-section="portfolio" aria-labelledby="portfolio-title">
-    <div class="wrap">
-      <div class="h-head">
-        <p class="mono">Our brands</p>
-        <h2 id="portfolio-title">The <span>portfolio.</span></h2>
-      </div>
-      {hasBrands ? <BrandGrid featuredOnly headingLevel={3} /> : (
-        <div class="plinth">
-          <Picture src={reflection} formats={['avif', 'webp']} widths={[900, 1600, 2400]} sizes="100vw" alt="" loading="lazy" />
-          <div class="glass plinth-card">
-            <span class="badge">Portfolio in development</span>
-            <h3>Our first brands are on the way.</h3>
-            <p>Benjaire's brands will be announced here as they launch. In the meantime, we welcome conversations with partners, manufacturers and collaborators.</p>
-            <a class="btn primary" href="/contact?category=partnership">Start a conversation <span aria-hidden="true">→</span></a>
-          </div>
-        </div>
-      )}
-    </div>
-  </section>
-
-  <!-- 7 · Inquiry -->
+  <!-- 5 · Inquiry -->
   <section class="partner" id="partner" data-section="partner" aria-labelledby="partner-title">
     <div class="wrap grid-2">
       <div class="partner-intro">
         <img src="/brand/benjaire-monogram-pearl.svg" alt="" width="53" height="56" />
-        <p class="mono">Get in touch</p>
+        <p class="eyebrow">Get in touch</p>
         <h2 id="partner-title">Let's simplify <span>your workflow.</span></h2>
-        <p>Explore how intelligent automation could improve your business operations. Partnerships, supplier inquiries and general questions start here too.</p>
+        <p>Explore how intelligent automation could improve your business operations. Partnerships and general questions start here too.</p>
         <div class="actions">
           <a class="btn primary" href="/contact?category=digital">Discuss your workflow <span aria-hidden="true">→</span></a>
           <a class="btn ghost" href="/contact#book">Book a call</a>

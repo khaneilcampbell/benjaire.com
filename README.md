@@ -1,6 +1,6 @@
 # Benjaire.com
 
-Website for Benjaire, a New York company developing consumer brands and digital solutions that combine technology, design, and business innovation. Benjaire is one company with two business pillars, **Digital Solutions** and **Consumer Brands**, under one identity.
+Website for Benjaire, a New York company that builds workflow automation and digital systems for service firms. Benjaire is one business, **Digital Solutions**, and its first product is **Benjaire Flow**. (Consumer Brands was retired on 2026-11-07.)
 
 Live at **https://benjaire.com**.
 
@@ -13,11 +13,10 @@ Live at **https://benjaire.com**.
 | `/digital/flow` | Benjaire Flow, the first Digital Solutions product (self install n8n inquiry automation kit), and Flow Installed, the kit set up for the client after a fit call |
 | `/digital/flow-thanks` | Post purchase page the Stripe Payment Link redirects to, `noindex` |
 | `/about` | About |
-| `/brands` | Consumer Brands |
-| `/contact` | Contact form (Digital Solutions, general, partnership, supplier inquiries) |
+| `/contact` | Contact form (Digital Solutions, general, partnership inquiries) |
 | `/privacy`, `/terms` | Legal drafts, `noindex` and out of the sitemap until reviewed |
 
-Legacy `.html` URLs (for example `/about.html`) redirect permanently to the clean paths.
+Legacy `.html` URLs (for example `/about.html`) redirect permanently to the clean paths. `/brands`, `/companies` and `/insights` redirect to `/digital`.
 
 ## Stack
 
@@ -60,7 +59,6 @@ Cloudflare Workers Builds deploys `main` to production automatically (`npx wrang
 
 - Benjaire stays company first: no founder name, personal bio, photo or personal social links anywhere on the site.
 - Shared company copy lives in `site/src/site.ts`. Reuse the canonical description word for word rather than paraphrasing it per page.
-- Brands appear only once they are publicly approved (`site/src/content/brands/`). This repository is public, so never commit unreleased brands.
 - House style: "a New York company", US spelling, no em dashes and no hyphenated compounds in visible copy. Meta descriptions are 120 to 160 characters.
 - Never commit secrets. Worker secrets are set in the Cloudflare dashboard only.
 - Never commit n8n workflow JSON or the Benjaire Flow product files; they are sold separately.
