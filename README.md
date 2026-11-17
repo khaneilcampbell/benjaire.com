@@ -11,11 +11,12 @@ Live at **https://benjaire.com**.
 | `/` | Home |
 | `/digital` | Digital Solutions |
 | `/digital/flow` | Benjaire Flow, the first Digital Solutions product (self install n8n inquiry automation kit), and Flow Installed, the kit set up for the client after a fit call |
-| `/digital/flow-thanks` | Post purchase page the Stripe Payment Link redirects to, `noindex` |
+| `/digital/flow-thanks` | Post purchase page Stripe redirects to, `noindex` |
+| `/digital/flow-cancel` | Page a buyer lands on after cancelling a Stripe Checkout session, `noindex` |
 | `/about` | About |
 | `/brands` | Consumer Brands |
 | `/contact` | Contact form (Digital Solutions, general, partnership, supplier inquiries) |
-| `/privacy`, `/terms` | Legal drafts, `noindex` and out of the sitemap until reviewed |
+| `/privacy`, `/terms`, `/refunds` | Legal drafts, `noindex` and out of the sitemap until reviewed |
 
 Legacy `.html` URLs (for example `/about.html`) redirect permanently to the clean paths.
 
@@ -23,8 +24,8 @@ Legacy `.html` URLs (for example `/about.html`) redirect permanently to the clea
 
 - [Astro](https://astro.build) static site in [`site/`](site/)
 - Hosted on **Cloudflare Workers** static assets (`site/wrangler.jsonc`), with `www` redirecting to the apex domain
-- Contact form handled by a small Worker at `/api/contact` (Turnstile, validation, rate limit). Valid inquiries are forwarded to the Benjaire Flow intake in n8n (`FLOW_INTAKE_URL`, `FLOW_KEY` secret), with Cloudflare Email Routing as the fallback
-- Benjaire Flow checkout uses Stripe Payment Links set in `FLOW_CHECKOUT` (`site/src/site.ts`); a tier without a link falls back to the contact form. Payment verification, order records and the download email run in n8n, outside this repository
+- Contact form handled by a small Worker at `/api/contact` (Turnstile, validation, rate limit). Valid inquiries are forwarded to the Benjaire Flow intake in n8n (`FLOW_INTAKE_URL` and `FLOW_INTAKE_KEY` secrets), with Cloudflare Email Routing as the fallback
+- Benjaire Flow checkout: the same Worker serves `/api/checkout`, which creates a Stripe Checkout Session for the tier's price ID in `STRIPE_TIERS` (`site/wrangler.jsonc`) when `STRIPE_SECRET_KEY` is set. Without that secret, or on any Stripe error, buyers are sent to the tier's Stripe Payment Link from `FLOW_CHECKOUT` (`site/src/site.ts`); a tier with no link falls back to the contact form. Payment verification, order records and the download email run in n8n, outside this repository
 - Security headers (CSP with script hashes, HSTS, `X-Frame-Options: DENY`) generated at build time
 - Design system v0.3 "The Pavilion": see [`docs/design-system.md`](docs/design-system.md)
 
