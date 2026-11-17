@@ -8,6 +8,10 @@ const JSON_HEADERS = {
   'Cache-Control': 'no-store',
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
+  // /api/* skips the static _headers file, so restate the transport and
+  // framing rules here (see scripts/security-headers.mjs).
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains',
+  'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
 };
 const MAX_BODY = 20_000;
 const GOOGLE_VERIFICATION_PATH = '/google16283c1e65acebfc.html';

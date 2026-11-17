@@ -41,6 +41,17 @@ else {
   }
 }
 
+// security.txt (RFC 9116): must exist, name a contact, and not be about to expire.
+const securityTxt = join(root, '.well-known', 'security.txt');
+if (!existsSync(securityTxt)) errors.push('.well-known/security.txt missing');
+else {
+  const txt = readFileSync(securityTxt, 'utf8');
+  const expires = Date.parse(txt.match(/^Expires:\s*(\S+)/m)?.[1] ?? '');
+  if (!/^Contact:\s*\S+/m.test(txt)) errors.push('security.txt has no Contact');
+  if (Number.isNaN(expires)) errors.push('security.txt has no valid Expires');
+  else if (expires - Date.now() < 30 * 86_400_000) errors.push('security.txt Expires is under 30 days away: renew it (max one year ahead)');
+}
+
 for (const e of errors) console.error(`✗ ${e}`);
 console.log(`${pages.length} pages checked, ${errors.length} SEO problem(s).`);
 process.exit(errors.length ? 1 : 0);

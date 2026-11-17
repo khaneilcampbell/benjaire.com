@@ -41,7 +41,7 @@ const csp = [
 
 const headers = `/*
   Content-Security-Policy: ${csp}
-  Strict-Transport-Security: max-age=31536000
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
