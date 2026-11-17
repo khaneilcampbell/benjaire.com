@@ -1,7 +1,7 @@
 // benjaire.com Worker. Static pages are served from ./dist by the assets
 // layer; only /api/* reaches this script (see wrangler.jsonc).
 import { EmailMessage } from 'cloudflare:email';
-import { atlasInboxUrl, atlasInquiry, atlasRun, buildMime, checkoutParams, composeEmail, flowPayload, hostAllowed, originAllowed, paymentLinkFor, postWithRetry, recipientFor, reportToAtlas, SITE_CAP_KEYS, underSiteCap, validate, type CheckoutTier, type Inquiry } from './lib';
+import { atlasInboxUrl, atlasInquiry, atlasRun, buildMime, checkoutParams, composeEmail, flowPayload, hostAllowed, isPaused, originAllowed, paymentLinkFor, postWithRetry, recipientFor, reportToAtlas, SITE_CAP_KEYS, underSiteCap, validate, type CheckoutTier, type Inquiry } from './lib';
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -90,6 +90,11 @@ async function handleContact(req: Request, env: Env, ctx: ExecutionContext): Pro
   const length = Number(req.headers.get('Content-Length') ?? '0');
   if (length > MAX_BODY) return respond(req, 413, { ok: false, error: 'Your message is too long.' });
 
+  if (isPaused(env.CONTACT_PAUSED)) {
+    report(env, ctx, atlasRun('benjaire-contact-worker', 'Contact form', 'skipped', 'Paused by CONTACT_PAUSED'));
+    return respond(req, 503, { ok: false, error: 'The contact form is paused for a moment. Please try again later.' });
+  }
+
   const ip = req.headers.get('CF-Connecting-IP');
   const { success: underLimit } = await env.CONTACT_LIMITER.limit({ key: ip ?? 'unknown' });
   if (!underLimit) {
@@ -160,7 +165,7 @@ async function handleContact(req: Request, env: Env, ctx: ExecutionContext): Pro
 // Session (success and cancel pages on this site) and redirects to it. Without
 // a secret key or a price for the tier, or if Stripe errors, the buyer goes to
 // the tier's Payment Link instead, so the buy button always works.
-async function handleCheckout(req: Request, env: Env): Promise<Response> {
+async function handleCheckout(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const url = new URL(req.url);
   const tier = url.searchParams.get('tier') ?? '';
   const fallback = paymentLinkFor(tier);
@@ -170,11 +175,16 @@ async function handleCheckout(req: Request, env: Env): Promise<Response> {
   const cfg = Object.hasOwn(tiers, tier) ? tiers[tier] : undefined;
   const ip = req.headers.get('CF-Connecting-IP') ?? 'unknown';
   if (!env.STRIPE_SECRET_KEY || !cfg?.price) return Response.redirect(fallback, 303);
+  if (isPaused(env.CHECKOUT_PAUSED)) {
+    report(env, ctx, atlasRun('benjaire-contact-worker', 'Checkout', 'skipped', 'Paused by CHECKOUT_PAUSED; sent to the Payment Link'));
+    return Response.redirect(fallback, 303);
+  }
   const { success: underLimit } = await env.CONTACT_LIMITER.limit({ key: `checkout:${ip}` });
   if (!underLimit) return Response.redirect(fallback, 303);
   // Past the site-wide cap, buyers still pay through the tier's Payment Link.
   if (!(await underSiteCap(env.SITE_LIMITER, SITE_CAP_KEYS.checkout))) {
     console.warn('Checkout site-wide cap reached');
+    report(env, ctx, atlasRun('benjaire-contact-worker', 'Checkout', 'skipped', 'Site-wide cap reached (20 a minute); sent to the Payment Link'));
     return Response.redirect(fallback, 303);
   }
 
@@ -190,8 +200,10 @@ async function handleCheckout(req: Request, env: Env): Promise<Response> {
     const data = (await res.json()) as { url?: string; error?: { message?: string } };
     if (res.ok && data.url) return Response.redirect(data.url, 303);
     console.error('Stripe checkout failed', res.status, data.error?.message);
+    report(env, ctx, atlasRun('benjaire-contact-worker', 'Checkout', 'failed', `Stripe HTTP ${res.status}; sent to the Payment Link`));
   } catch (err) {
     console.error('Stripe checkout failed', err instanceof Error ? err.message : err);
+    report(env, ctx, atlasRun('benjaire-contact-worker', 'Checkout', 'failed', 'Stripe unreachable; sent to the Payment Link'));
   }
   return Response.redirect(fallback, 303);
 }
@@ -200,7 +212,7 @@ export default {
   async fetch(req, env, ctx): Promise<Response> {
     const { pathname } = new URL(req.url);
     if (pathname === '/api/contact') return handleContact(req, env, ctx);
-    if (pathname === '/api/checkout') return handleCheckout(req, env);
+    if (pathname === '/api/checkout') return handleCheckout(req, env, ctx);
     // Google Search Console HTML-file verification must answer 200 at this
     // exact .html path (the assets layer would redirect it to a clean URL).
     if (pathname === GOOGLE_VERIFICATION_PATH) {
